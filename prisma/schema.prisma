@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         String    @default("PRATICIEN")
+  specialty    String    @default("")
+  phone        String    @default("")
+  address      String    @default("")
+  bio          String    @default("")
+  avatarUrl    String    @default("")
+  maxClientsPerDay Int   @default(6)
+  bufferMinutes    Int   @default(15)
+
+  // Abonnement Stripe
+  stripeCustomerId   String?   @unique
+  stripeSubscriptionId String?
+  stripePriceId      String?
+  stripeCurrentPeriodEnd DateTime?
+  trialEndsAt        DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  clients      Client[]
+  seances      Seance[]
+  factures     Facture[]
+}
+
+// Fiche client enrichie pour le suivi therapeutique
+model Client {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String    @default("")
+  phone         String    @default("")
+  dateOfBirth   String    @default("")
+  gender        String    @default("")
+  address       String    @default("")
+  profession    String    @default("")
+  referredBy    String    @default("")
+  status        String    @default("ACTIF")
+
+  // Anamnese / Bilan initial
+  motifConsultation  String  @default("")
+  antecedentsMedicaux String @default("")
+  antecedentsFamiliaux String @default("")
+  traitementEnCours  String  @default("")
+  allergies          String  @default("")
+  habitudesVie       String  @default("")
+  qualiteSommeil     String  @default("")
+  niveauStress       String  @default("")
+  alimentation       String  @default("")
+  activitePhysique   String  @default("")
+
+  // Suivi therapeutique
+  objectifs          String  @default("")
+  contreIndications  String  @default("")
+  consentement       Boolean @default(false)
+
+  // Notes internes
+  notesPrivees       String  @default("")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  praticien     User      @relation(fields: [praticienId], references: [id], onDelete: Cascade)
+  praticienId   String
+  seances       Seance[]
+  factures      Facture[]
+  notes         NoteEvolution[]
+}
+
+// Notes d'evolution - timeline du suivi
+model NoteEvolution {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  title       String
+  content     String
+  category    String   @default("observation")
+  createdAt   DateTime @default(now())
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+}
+
+model Seance {
+  id            String    @id @default(cuid())
+  date          DateTime
+  duration      Int       @default(60)
+  type          String    @default("Consultation")
+  status        String    @default("PLANIFIEE")
+  notesBefore   String    @default("")
+  notesAfter    String    @default("")
+  notesPrivate  String    @default("")
+  price         Float     @default(0)
+  paid          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+  praticien     User      @relation(fields: [praticienId], references: [id], onDelete: Cascade)
+  praticienId   String
+}
+
+model Facture {
+  id            String    @id @default(cuid())
+  number        String    @unique
+  date          DateTime  @default(now())
+  dueDate       DateTime?
+  amount        Float
+  status        String    @default("EN_ATTENTE")
+  description   String    @default("")
+  paymentMethod String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      String
+  praticien     User      @relation(fields: [praticienId], references: [id], onDelete: Cascade)
+  praticienId   String
+}

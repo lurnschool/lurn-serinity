@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/julienhafis/.nvm/versions/**)",
+      "Bash(npx --yes serve --version)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:shiny-begonia-c38f4b.netlify.app)",
+      "WebSearch",
+      "Bash(rm -f prisma/dev.db)",
+      "Bash(npx prisma:*)",
+      "Bash(export PATH=\"/usr/local/bin:$PATH\")",
+      "Bash(node prisma/seed.js)",
+      "Bash(ls src/app/clients/[id]/page.js)",
+      "Bash(npx next:*)",
+      "Bash(export PATH=/usr/local/bin:$PATH)",
+      "Bash(node -e \"console.log\\(''''node ok''''\\)\")"
+    ]
+  }
+}
