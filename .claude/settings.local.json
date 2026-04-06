@@ -15,7 +15,10 @@
       "Bash(ls src/app/clients/[id]/page.js)",
       "Bash(npx next:*)",
       "Bash(export PATH=/usr/local/bin:$PATH)",
-      "Bash(node -e \"console.log\\(''''node ok''''\\)\")"
+      "Bash(node -e \"console.log\\(''''node ok''''\\)\")",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_FyDctw3ETZV1@ep-steep-boat-al6k2n0b-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
+      "Bash(curl -X POST \"https://lurn-serinity-lurn-school.vercel.app/api/admin?secret=mon-admin-secret-2024&email=contact@lurnschool.com\")",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_FyDctw3ETZV1@ep-steep-boat-al6k2n0b-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db execute --stdin <<'SQL':*)"
     ]
   }
 }

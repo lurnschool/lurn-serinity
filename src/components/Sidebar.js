@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 
 const navigation = [
   {
@@ -54,6 +55,9 @@ function NavLink({ item, isActive, onClick }) {
 export default function Sidebar() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const { data: session } = useSession()
+  const userName = session?.user?.name || 'Utilisateur'
+  const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
   useEffect(() => { setOpen(false) }, [pathname])
 
@@ -96,11 +100,14 @@ export default function Sidebar() {
         <div className="px-3 py-4 border-t border-surface-200">
           <div className="px-3 py-3 rounded-xl bg-surface-100 border border-surface-200">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-semibold">JH</div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-surface-900 truncate">Julien Hafis</p>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-semibold">{initials}</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-surface-900 truncate">{userName}</p>
                 <p className="text-xs text-surface-500 truncate">Praticien</p>
               </div>
+              <button onClick={() => signOut({ callbackUrl: '/connexion' })} className="p-1.5 rounded-lg hover:bg-surface-200 text-surface-500 hover:text-surface-800 transition-colors" title="Deconnexion">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+              </button>
             </div>
           </div>
         </div>
@@ -132,11 +139,14 @@ export default function Sidebar() {
           <NavLink item={navigation[4]} isActive={pathname === navigation[4].href} />
           <div className="mt-3 px-3 py-3 rounded-xl bg-surface-100 border border-surface-200">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-semibold">JH</div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-surface-900 truncate">Julien Hafis</p>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-xs font-semibold">{initials}</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-surface-900 truncate">{userName}</p>
                 <p className="text-xs text-surface-500 truncate">Praticien</p>
               </div>
+              <button onClick={() => signOut({ callbackUrl: '/connexion' })} className="p-1.5 rounded-lg hover:bg-surface-200 text-surface-500 hover:text-surface-800 transition-colors" title="Deconnexion">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+              </button>
             </div>
           </div>
         </div>
