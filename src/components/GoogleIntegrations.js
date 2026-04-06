@@ -53,6 +53,35 @@ const SERVICES = [
   },
 ]
 
+function ExportButton({ type }) {
+  const [exporting, setExporting] = useState(false)
+  const labels = { clients: 'Clients', seances: 'Seances', factures: 'Factures' }
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const res = await fetch('/api/google/export-sheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.open(data.url, '_blank')
+      }
+    } catch {}
+    setExporting(false)
+  }
+
+  return (
+    <button onClick={handleExport} disabled={exporting}
+      className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+    >
+      {exporting ? 'Export...' : labels[type]}
+    </button>
+  )
+}
+
 export default function GoogleIntegrations() {
   const [connected, setConnected] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -109,6 +138,18 @@ export default function GoogleIntegrations() {
           </div>
         ))}
       </div>
+
+      {/* Export Sheets */}
+      {connected && (
+        <div className="pt-1 space-y-2">
+          <p className="text-xs text-surface-500 font-medium uppercase tracking-wide">Exporter vers Google Sheets</p>
+          <div className="flex gap-2 flex-wrap">
+            {['clients', 'seances', 'factures'].map(type => (
+              <ExportButton key={type} type={type} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="pt-1">
         {connected ? (

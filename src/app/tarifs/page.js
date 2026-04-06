@@ -7,7 +7,7 @@ const plans = [
   {
     name: 'Essentiel',
     price: '29',
-    priceId: 'price_essentiel',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ESSENTIEL || 'price_essentiel',
     description: 'Tout ce qu\'il faut pour gerer votre activite au quotidien.',
     features: [
       'Gestion clients illimitee',
@@ -21,11 +21,12 @@ const plans = [
   {
     name: 'Premium',
     price: '49',
-    priceId: 'price_premium',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM || 'price_premium',
     description: 'L\'experience complete pour les professionnels exigeants.',
     features: [
       'Tout le plan Essentiel',
       'Agenda integre',
+      'Google Agenda, Gmail, Drive, Sheets',
       'Rappels automatiques',
       'Statistiques avancees',
       'Support prioritaire',

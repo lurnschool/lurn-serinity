@@ -206,6 +206,165 @@ function QuickSeanceModal({ client, onClose, onSave }) {
   )
 }
 
+function EmailModal({ client, onClose }) {
+  const [form, setForm] = useState({
+    subject: '',
+    body: '',
+  })
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState(null)
+
+  const templates = [
+    { label: 'Rappel de RDV', subject: `Rappel de votre rendez-vous`, body: `Bonjour ${client.firstName},\n\nJe vous rappelle votre prochain rendez-vous.\n\nN'hesitez pas a me contacter si vous souhaitez modifier ou annuler.\n\nCordialement` },
+    { label: 'Confirmation', subject: `Confirmation de votre rendez-vous`, body: `Bonjour ${client.firstName},\n\nJe confirme votre rendez-vous.\n\nA bientot !\n\nCordialement` },
+    { label: 'Suivi', subject: `Suivi apres votre seance`, body: `Bonjour ${client.firstName},\n\nJ'espere que vous allez bien depuis notre derniere seance.\n\nN'hesitez pas a me faire part de vos ressentis.\n\nCordialement` },
+  ]
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSending(true)
+    try {
+      const res = await fetch('/api/google/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: client.email, subject: form.subject, body: form.body.replace(/\n/g, '<br>') }),
+      })
+      if (res.ok) {
+        setResult({ type: 'success', msg: 'Email envoye !' })
+        setTimeout(() => onClose(), 1500)
+      } else {
+        const data = await res.json()
+        setResult({ type: 'error', msg: data.error || 'Erreur' })
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center lg:pl-64">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-surface-100 border border-surface-200 rounded-2xl shadow-modal animate-slide-up mx-4">
+        <div className="border-b border-surface-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-title text-surface-950">Envoyer un email a {client.firstName}</h2>
+          <button onClick={onClose} className="btn-ghost p-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm text-surface-600 mb-1.5">Modeles rapides</label>
+            <div className="flex gap-2 flex-wrap">
+              {templates.map(t => (
+                <button key={t.label} type="button" onClick={() => setForm({ subject: t.subject, body: t.body })}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-surface-200 border border-surface-300 text-surface-600 hover:bg-surface-300 transition-colors"
+                >{t.label}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-surface-600 mb-1.5">A</label>
+            <input className="input-field bg-surface-200 text-surface-500" value={client.email} disabled />
+          </div>
+          <div>
+            <label className="block text-sm text-surface-600 mb-1.5">Objet</label>
+            <input className="input-field" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} required placeholder="Objet de l'email..." />
+          </div>
+          <div>
+            <label className="block text-sm text-surface-600 mb-1.5">Message</label>
+            <textarea className="input-field resize-none" rows={6} value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value }))} required placeholder="Votre message..." />
+          </div>
+          {result && (
+            <div className={`text-sm font-medium ${result.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>{result.msg}</div>
+          )}
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary">Annuler</button>
+            <button type="submit" disabled={sending} className="btn-primary">{sending ? 'Envoi...' : 'Envoyer'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function DocumentsTab({ client }) {
+  const [files, setFiles] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const clientName = `${client.firstName} ${client.lastName}`
+
+  const fetchFiles = async () => {
+    try {
+      const res = await fetch(`/api/google/drive?clientName=${encodeURIComponent(clientName)}`)
+      if (res.ok) setFiles(await res.json())
+    } catch {}
+    setLoading(false)
+  }
+
+  useEffect(() => { fetchFiles() }, [])
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('clientName', clientName)
+    try {
+      const res = await fetch('/api/google/drive', { method: 'POST', body: formData })
+      if (res.ok) fetchFiles()
+    } catch {}
+    setUploading(false)
+    e.target.value = ''
+  }
+
+  const formatSize = (bytes) => {
+    if (!bytes) return ''
+    const kb = parseInt(bytes) / 1024
+    return kb > 1024 ? `${(kb / 1024).toFixed(1)} Mo` : `${Math.round(kb)} Ko`
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <label className="btn-primary cursor-pointer">
+          <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+          {uploading ? 'Upload...' : 'Ajouter un document'}
+          <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
+        </label>
+      </div>
+
+      {loading ? (
+        <div className="card p-12 text-center">
+          <div className="w-6 h-6 rounded-full border-2 border-brand-500 border-t-transparent animate-spin mx-auto" />
+        </div>
+      ) : files.length === 0 ? (
+        <div className="card p-12 text-center">
+          <svg className="w-10 h-10 text-surface-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" /></svg>
+          <p className="text-sm text-surface-500">Aucun document pour ce client</p>
+          <p className="text-xs text-surface-400 mt-1">Les documents sont stockes dans Google Drive</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {files.map(file => (
+            <a key={file.id} href={file.webViewLink} target="_blank" rel="noopener noreferrer" className="card p-4 flex items-center gap-4 hover:shadow-card-hover transition-shadow">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-surface-950 truncate">{file.name}</p>
+                <p className="text-xs text-surface-500">{formatSize(file.size)} — {new Date(file.createdTime).toLocaleDateString('fr-FR')}</p>
+              </div>
+              <svg className="w-4 h-4 text-surface-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ClientDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -217,6 +376,7 @@ export default function ClientDetailPage() {
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [editNote, setEditNote] = useState(null)
   const [showSeanceModal, setShowSeanceModal] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
 
   const fetchData = async () => {
     const [clientRes, notesRes, seancesRes] = await Promise.all([
@@ -269,6 +429,7 @@ export default function ClientDetailPage() {
     { key: 'fiche', label: 'Fiche client' },
     { key: 'timeline', label: `Notes (${notes.length})` },
     { key: 'seances', label: `Seances (${seances.length})` },
+    { key: 'documents', label: 'Documents' },
   ]
 
   return (
@@ -297,8 +458,8 @@ export default function ClientDetailPage() {
           <div className="flex items-center gap-2 flex-wrap">
             {/* Email */}
             {client.email && (
-              <a
-                href={`mailto:${client.email}`}
+              <button
+                onClick={() => setShowEmailModal(true)}
                 className="btn-secondary text-xs flex items-center gap-1.5"
                 title="Envoyer un email"
               >
@@ -306,7 +467,7 @@ export default function ClientDetailPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                 </svg>
                 Email
-              </a>
+              </button>
             )}
 
             {/* WhatsApp */}
@@ -528,6 +689,9 @@ export default function ClientDetailPage() {
         </div>
       )}
 
+      {/* Tab: Documents (Google Drive) */}
+      {activeTab === 'documents' && <DocumentsTab client={client} />}
+
       {/* Note Modal */}
       {showNoteModal && (
         <NoteModal
@@ -544,6 +708,14 @@ export default function ClientDetailPage() {
           client={client}
           onClose={() => setShowSeanceModal(false)}
           onSave={() => { setShowSeanceModal(false); fetchData() }}
+        />
+      )}
+
+      {/* Email Modal (Gmail) */}
+      {showEmailModal && (
+        <EmailModal
+          client={client}
+          onClose={() => setShowEmailModal(false)}
         />
       )}
     </div>
