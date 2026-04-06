@@ -4,9 +4,8 @@ import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 export async function POST(request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const session = await getServerSession(authOptions)
   if (!session) {
     return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
