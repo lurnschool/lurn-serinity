@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import GoogleIntegrations from '@/components/GoogleIntegrations'
 
 async function getPraticien() {
   return prisma.user.findFirst()
@@ -62,6 +63,9 @@ export default async function ParametresPage() {
           </div>
         </div>
       </div>
+
+      {/* Google integrations */}
+      <GoogleIntegrations />
 
       {/* App info */}
       <div className="card p-6">
