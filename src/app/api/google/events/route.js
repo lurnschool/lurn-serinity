@@ -11,8 +11,17 @@ export async function GET(request) {
   }
 
   const { searchParams } = new URL(request.url)
+  const check = searchParams.get('check')
   const start = searchParams.get('start')
   const end = searchParams.get('end')
+
+  // Status check only
+  if (check) {
+    const { getAuthenticatedClient } = await import('@/lib/google-calendar')
+    const auth = await getAuthenticatedClient(session.user.id)
+    if (!auth) return NextResponse.json({ connected: false }, { status: 401 })
+    return NextResponse.json({ connected: true })
+  }
 
   if (!start || !end) {
     return NextResponse.json({ error: 'Paramètres start et end requis' }, { status: 400 })

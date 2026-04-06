@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8) // 8h - 19h
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
@@ -156,6 +157,9 @@ export default function AgendaPage() {
   const [showModal, setShowModal] = useState(false)
   const [editSeance, setEditSeance] = useState(null)
   const [selectedDate, setSelectedDate] = useState(null)
+  const [googleConnected, setGoogleConnected] = useState(false)
+  const [googleToast, setGoogleToast] = useState(null)
+  const searchParams = useSearchParams()
 
   const weekDates = getWeekDates(currentDate)
 
@@ -169,7 +173,23 @@ export default function AgendaPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchData() }, [])
+  const checkGoogleStatus = async () => {
+    const res = await fetch('/api/google/events?check=1')
+    setGoogleConnected(res.ok && res.status !== 401)
+  }
+
+  useEffect(() => {
+    fetchData()
+    checkGoogleStatus()
+    const googleParam = searchParams.get('google')
+    if (googleParam === 'connected') {
+      setGoogleToast({ type: 'success', msg: 'Google Agenda connecte avec succes !' })
+      setTimeout(() => setGoogleToast(null), 4000)
+    } else if (googleParam === 'error') {
+      setGoogleToast({ type: 'error', msg: 'Erreur lors de la connexion Google.' })
+      setTimeout(() => setGoogleToast(null), 4000)
+    }
+  }, [])
 
   const navigateWeek = (dir) => {
     const d = new Date(currentDate)
@@ -218,6 +238,13 @@ export default function AgendaPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Google toast */}
+      {googleToast && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium animate-slide-up ${googleToast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+          {googleToast.msg}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -227,6 +254,24 @@ export default function AgendaPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {googleConnected ? (
+            <button
+              onClick={async () => { await fetch('/api/google/disconnect', { method: 'POST' }); setGoogleConnected(false) }}
+              className="btn-secondary text-xs flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              Google connecte
+            </button>
+          ) : (
+            <a href="/api/google/auth" className="btn-secondary text-xs flex items-center gap-2">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+              </svg>
+              Connecter Google Agenda
+            </a>
+          )}
           <button onClick={goToday} className="btn-secondary text-xs">Aujourd&apos;hui</button>
           <button onClick={() => { setEditSeance(null); setSelectedDate(null); setShowModal(true) }} className="btn-primary">
             <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
