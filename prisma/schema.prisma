@@ -28,6 +28,12 @@ model User {
   stripeCurrentPeriodEnd DateTime?
   trialEndsAt        DateTime?
 
+  // Google Calendar
+  googleAccessToken    String?
+  googleRefreshToken   String?
+  googleCalendarId     String?   @default("primary")
+  googleTokenExpiry    DateTime?
+
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
