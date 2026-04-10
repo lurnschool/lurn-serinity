@@ -25,6 +25,7 @@ export async function POST(req) {
         duree: parseInt(data.duree) || 4,
         image: data.image || '',
       },
+      include: { exercices: { include: { equipement: true }, orderBy: { ordre: 'asc' } } },
     })
     return NextResponse.json(programme)
   } catch (e) {

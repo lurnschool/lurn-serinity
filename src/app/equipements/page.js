@@ -158,7 +158,7 @@ export default function EquipementsPage() {
 
   const filtered = equipements.filter(e => {
     if (filterCat !== 'tous' && e.categorie !== filterCat) return false
-    if (search && !e.nom.toLowerCase().includes(search.toLowerCase()) && !e.muscles.toLowerCase().includes(search.toLowerCase())) return false
+    if (search && !e.nom.toLowerCase().includes(search.toLowerCase()) && !e.muscles?.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 

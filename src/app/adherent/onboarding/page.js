@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Script from 'next/script'
 
 const OBJECTIFS = [
   { value: 'prise_masse', label: 'Prise de masse', icon: '💪', desc: 'Gagner du muscle et du volume' },
