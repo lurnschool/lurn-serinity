@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 export default function ConnexionPage() {
   const router = useRouter()
@@ -85,11 +84,8 @@ export default function ConnexionPage() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-surface-500 mt-6">
-          Pas encore de compte ?{' '}
-          <Link href="/inscription" className="text-brand-400 hover:text-brand-300 font-medium">
-            Creer un compte
-          </Link>
+        <p className="text-center text-xs text-surface-400 mt-6">
+          Acces reserve aux adherents City Coaching
         </p>
       </div>
     </div>
