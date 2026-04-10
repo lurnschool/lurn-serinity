@@ -6,6 +6,18 @@
       "runtimeExecutable": "/bin/bash",
       "runtimeArgs": ["-c", "export PATH=/usr/local/bin:$PATH && cd /Users/julienhafis/Desktop/City\\ Coaching && npm run dev"],
       "port": 3000
+    },
+    {
+      "name": "lurn-group",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "python3 -m http.server 3456 --directory '/Users/julienhafis/Desktop/Lurn Group'"],
+      "port": 3456
+    },
+    {
+      "name": "nexaai-demo",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd '/Users/julienhafis/Desktop/City Coaching' && python3 -m http.server 3457"],
+      "port": 3457
     }
   ]
 }

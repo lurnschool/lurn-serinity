@@ -27,7 +27,7 @@ a {
 }
 
 ::selection {
-  background-color: rgba(212, 160, 78, 0.25);
+  background-color: rgba(34, 197, 94, 0.25);
   color: #f5f5f8;
 }
 
@@ -51,7 +51,7 @@ a {
 
 /* Focus */
 *:focus-visible {
-  outline: 2px solid rgba(212, 160, 78, 0.4);
+  outline: 2px solid rgba(34, 197, 94, 0.4);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -77,20 +77,20 @@ input, select, textarea {
 
   .card-interactive:hover {
     @apply border-surface-300;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 160, 78, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(34, 197, 94, 0.1);
     transform: translateY(-1px);
   }
 
   .btn-primary {
     @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium text-sm;
     @apply text-surface-0;
-    background: linear-gradient(135deg, #c4882f, #a86d22);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     transition: all 0.2s ease;
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, #d4a04e, #c4882f);
-    box-shadow: 0 4px 16px rgba(196, 136, 47, 0.3);
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
   }
 
   .btn-secondary {
@@ -118,7 +118,7 @@ input, select, textarea {
 
   .input-field:focus {
     @apply border-brand-500 outline-none;
-    box-shadow: 0 0 0 2px rgba(196, 136, 47, 0.15);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15);
   }
 
   .badge {

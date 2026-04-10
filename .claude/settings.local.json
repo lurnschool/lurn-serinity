@@ -18,7 +18,20 @@
       "Bash(node -e \"console.log\\(''''node ok''''\\)\")",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_FyDctw3ETZV1@ep-steep-boat-al6k2n0b-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db push)",
       "Bash(curl -X POST \"https://lurn-serinity-lurn-school.vercel.app/api/admin?secret=mon-admin-secret-2024&email=contact@lurnschool.com\")",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_FyDctw3ETZV1@ep-steep-boat-al6k2n0b-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db execute --stdin <<'SQL':*)"
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_FyDctw3ETZV1@ep-steep-boat-al6k2n0b-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma db execute --stdin <<'SQL':*)",
+      "Read(//Users/julienhafis/Desktop/**)",
+      "Bash(python3 -c \"import os; print\\(os.getcwd\\(\\)\\)\")",
+      "Bash(npx create-next-app@14 lurn-groupe --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(npm -v)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(node -e \":*)",
+      "Bash(npm run:*)",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$HOME/.nvm/versions/node/*/bin:$PATH\")",
+      "Bash(npx vercel:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python3)",
+      "Bash(ls \"/Users/julienhafis/Desktop/City Coaching/\"*.db)",
+      "Bash(ls \"/Users/julienhafis/Desktop/City Coaching/prisma/\"*.db)"
     ]
   }
 }

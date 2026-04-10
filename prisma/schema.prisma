@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -40,6 +41,9 @@ model User {
   clients      Client[]
   seances      Seance[]
   factures     Facture[]
+
+  // Compte adherent (role = ADHERENT)
+  clientProfile Client? @relation("AdherentAccount")
 }
 
 // Fiche client enrichie pour le suivi therapeutique
@@ -73,8 +77,36 @@ model Client {
   contreIndications  String  @default("")
   consentement       Boolean @default(false)
 
+  // Onboarding & Body Check
+  onboardingDone     Boolean @default(false)
+  taille             Float?    // en cm
+  poids              Float?    // en kg
+  poidsObjectif      Float?    // en kg
+  imc                Float?
+  niveauSport        String  @default("")
+  frequenceSport     String  @default("")
+  objectifPrincipal  String  @default("")
+  regimeAlimentaire  String  @default("")
+  hydratation        String  @default("")
+  complements        String  @default("")
+  problemesSante     String  @default("")
+  scoreGlobal        Int?
+  motivation         Int?      // 1-10
+  tourTaille         Float?    // en cm
+  dateObjectif       DateTime?
+  aimeManger         String  @default("")
+  mangeDeTout        Boolean @default(true)
+  grignotage         String  @default("")
+  repasParJour       String  @default("")
+  petitDejeuner      String  @default("")
+  dernierBilanDate   DateTime?
+
   // Notes internes
   notesPrivees       String  @default("")
+
+  // Compte adherent lie
+  adherentUser    User?   @relation("AdherentAccount", fields: [adherentUserId], references: [id])
+  adherentUserId  String? @unique
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -84,6 +116,36 @@ model Client {
   seances       Seance[]
   factures      Facture[]
   notes         NoteEvolution[]
+  programmes    ClientProgramme[]
+  progressions  Progression[]
+  mesures       Mesure[]
+}
+
+// Suivi des mensurations dans le temps
+model Mesure {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  poids       Float?
+  tourTaille  Float?
+  imc         Float?
+  note        String   @default("")
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+}
+
+// Table de liaison Client <-> Programme
+model ClientProgramme {
+  id          String   @id @default(cuid())
+  assignedAt  DateTime @default(now())
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+
+  programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  programmeId String
+
+  @@unique([clientId, programmeId])
 }
 
 // Notes d'evolution - timeline du suivi
@@ -135,4 +197,74 @@ model Facture {
   clientId      String
   praticien     User      @relation(fields: [praticienId], references: [id], onDelete: Cascade)
   praticienId   String
+}
+
+// ============ CITY COACHING ============
+
+model Programme {
+  id          String     @id @default(cuid())
+  nom         String
+  description String     @default("")
+  objectif    String     @default("remise_forme")
+  niveau      String     @default("debutant")
+  duree       Int        @default(4)
+  image       String     @default("")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  exercices    Exercice[]
+  clients      ClientProgramme[]
+  progressions Progression[]
+}
+
+model Exercice {
+  id           String      @id @default(cuid())
+  nom          String
+  description  String      @default("")
+  series       Int         @default(3)
+  repetitions  String      @default("10-12")
+  repos        Int         @default(60)
+  conseils     String      @default("")
+  ordre        Int         @default(0)
+  createdAt    DateTime    @default(now())
+
+  programme    Programme   @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  programmeId  String
+
+  equipement   Equipement? @relation(fields: [equipementId], references: [id])
+  equipementId String?
+
+  progressions Progression[]
+}
+
+// Suivi de progression des adherents
+model Progression {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  completed   Boolean  @default(true)
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+
+  programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  programmeId String
+
+  exercice    Exercice  @relation(fields: [exerciceId], references: [id], onDelete: Cascade)
+  exerciceId  String
+
+  @@unique([clientId, exerciceId, date])
+}
+
+model Equipement {
+  id          String     @id @default(cuid())
+  nom         String
+  description String     @default("")
+  muscles     String     @default("")
+  categorie   String     @default("musculation")
+  conseils    String     @default("")
+  image       String     @default("")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  exercices   Exercice[]
 }

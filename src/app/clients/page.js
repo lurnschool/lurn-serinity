@@ -7,129 +7,95 @@ function getInitials(firstName, lastName) {
   return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase()
 }
 
-function ClientModal({ client, onClose, onSave }) {
-  const isEdit = !!client?.id
-  const [form, setForm] = useState({
-    firstName: client?.firstName || '',
-    lastName: client?.lastName || '',
-    email: client?.email || '',
-    phone: client?.phone || '',
-    dateOfBirth: client?.dateOfBirth || '',
-    gender: client?.gender || '',
-    address: client?.address || '',
-    profession: client?.profession || '',
-    referredBy: client?.referredBy || '',
-    motifConsultation: client?.motifConsultation || '',
-    antecedentsMedicaux: client?.antecedentsMedicaux || '',
-    antecedentsFamiliaux: client?.antecedentsFamiliaux || '',
-    traitementEnCours: client?.traitementEnCours || '',
-    allergies: client?.allergies || '',
-    habitudesVie: client?.habitudesVie || '',
-    qualiteSommeil: client?.qualiteSommeil || '',
-    niveauStress: client?.niveauStress || '',
-    alimentation: client?.alimentation || '',
-    activitePhysique: client?.activitePhysique || '',
-    objectifs: client?.objectifs || '',
-    contreIndications: client?.contreIndications || '',
-    notesPrivees: client?.notesPrivees || '',
-  })
+function NewClientModal({ onClose, onSave }) {
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '' })
   const [saving, setSaving] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
+    setError('')
     try {
       const res = await fetch('/api/clients', {
-        method: isEdit ? 'PUT' : 'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isEdit ? { ...form, id: client.id } : form),
+        body: JSON.stringify(form),
       })
-      if (res.ok) onSave()
+      const data = await res.json()
+      if (res.ok) {
+        setResult(data)
+      } else {
+        setError(data.error || 'Erreur')
+      }
     } finally {
       setSaving(false)
     }
   }
 
-  const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center lg:pl-64">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-surface-100 border border-surface-200 rounded-2xl shadow-modal animate-slide-up mx-4">
-        <div className="sticky top-0 bg-surface-100 border-b border-surface-200 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
-          <h2 className="text-title text-surface-950">{isEdit ? 'Modifier le client' : 'Nouveau client'}</h2>
-          <button onClick={onClose} className="btn-ghost p-2">
+      <div className="relative w-full max-w-md bg-surface-100 border border-surface-200 rounded-2xl shadow-modal animate-slide-up mx-4">
+        <div className="border-b border-surface-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-title text-surface-950">Nouveau client</h2>
+          <button onClick={result ? onSave : onClose} className="btn-ghost p-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Identite */}
-          <div>
-            <p className="section-label mb-3">Identite</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div><label className="block text-sm text-surface-600 mb-1">Prenom</label><input className="input-field" value={form.firstName} onChange={e => update('firstName', e.target.value)} required /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Nom</label><input className="input-field" value={form.lastName} onChange={e => update('lastName', e.target.value)} required /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Email</label><input className="input-field" type="email" value={form.email} onChange={e => update('email', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Telephone</label><input className="input-field" value={form.phone} onChange={e => update('phone', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Date de naissance</label><input className="input-field" type="date" value={form.dateOfBirth} onChange={e => update('dateOfBirth', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Genre</label>
-                <select className="input-field" value={form.gender} onChange={e => update('gender', e.target.value)}>
-                  <option value="">--</option><option value="Femme">Femme</option><option value="Homme">Homme</option><option value="Autre">Autre</option>
-                </select>
+        {result ? (
+          <div className="p-6 space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-brand-500/10 flex items-center justify-center mx-auto">
+              <svg className="w-7 h-7 text-brand-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-base font-semibold text-surface-950">Client cree avec succes</p>
+              <p className="text-sm text-surface-500 mt-1">Voici ses identifiants de connexion :</p>
+            </div>
+            <div className="p-4 bg-surface-50 border border-surface-200 rounded-xl space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-surface-500">Email</span>
+                <span className="text-sm font-medium text-surface-950">{form.email}</span>
               </div>
-              <div><label className="block text-sm text-surface-600 mb-1">Profession</label><input className="input-field" value={form.profession} onChange={e => update('profession', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Adresse par</label><input className="input-field" value={form.referredBy} onChange={e => update('referredBy', e.target.value)} placeholder="Qui vous a recommande ?" /></div>
-              <div className="sm:col-span-2"><label className="block text-sm text-surface-600 mb-1">Adresse</label><input className="input-field" value={form.address} onChange={e => update('address', e.target.value)} /></div>
-            </div>
-          </div>
-
-          {/* Motif */}
-          <div>
-            <p className="section-label mb-3">Motif de consultation</p>
-            <textarea className="input-field resize-none" rows={3} value={form.motifConsultation} onChange={e => update('motifConsultation', e.target.value)} placeholder="Raison de la venue, symptomes, attentes..." />
-          </div>
-
-          {/* Anamnese */}
-          <div>
-            <p className="section-label mb-3">Anamnese</p>
-            <div className="space-y-3">
-              <div><label className="block text-sm text-surface-600 mb-1">Antecedents medicaux</label><textarea className="input-field resize-none" rows={2} value={form.antecedentsMedicaux} onChange={e => update('antecedentsMedicaux', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Antecedents familiaux</label><textarea className="input-field resize-none" rows={2} value={form.antecedentsFamiliaux} onChange={e => update('antecedentsFamiliaux', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Traitement en cours</label><textarea className="input-field resize-none" rows={2} value={form.traitementEnCours} onChange={e => update('traitementEnCours', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Allergies / Intolerances</label><textarea className="input-field resize-none" rows={2} value={form.allergies} onChange={e => update('allergies', e.target.value)} /></div>
-            </div>
-          </div>
-
-          {/* Mode de vie */}
-          <div>
-            <p className="section-label mb-3">Mode de vie</p>
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div><label className="block text-sm text-surface-600 mb-1">Qualite du sommeil</label><textarea className="input-field resize-none" rows={2} value={form.qualiteSommeil} onChange={e => update('qualiteSommeil', e.target.value)} /></div>
-                <div><label className="block text-sm text-surface-600 mb-1">Niveau de stress</label><textarea className="input-field resize-none" rows={2} value={form.niveauStress} onChange={e => update('niveauStress', e.target.value)} /></div>
+              <div className="flex justify-between">
+                <span className="text-sm text-surface-500">Mot de passe</span>
+                <span className="text-sm font-mono font-medium text-brand-400">{result.password}</span>
               </div>
-              <div><label className="block text-sm text-surface-600 mb-1">Alimentation</label><textarea className="input-field resize-none" rows={2} value={form.alimentation} onChange={e => update('alimentation', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Activite physique</label><textarea className="input-field resize-none" rows={2} value={form.activitePhysique} onChange={e => update('activitePhysique', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Habitudes de vie</label><textarea className="input-field resize-none" rows={2} value={form.habitudesVie} onChange={e => update('habitudesVie', e.target.value)} placeholder="Tabac, alcool, ecrans..." /></div>
             </div>
+            <p className="text-xs text-surface-400 text-center">
+              {result.emailSent
+                ? <span className="text-brand-400">✓ Un email avec les identifiants a ete envoye a l&apos;adherent.</span>
+                : <>Communique ces identifiants a l&apos;adherent. Il pourra se connecter et choisir son programme.</>
+              }
+            </p>
+            <button onClick={onSave} className="btn-primary w-full justify-center">Fermer</button>
           </div>
-
-          {/* Objectifs et contre-indications */}
-          <div>
-            <p className="section-label mb-3">Suivi therapeutique</p>
-            <div className="space-y-3">
-              <div><label className="block text-sm text-surface-600 mb-1">Objectifs</label><textarea className="input-field resize-none" rows={2} value={form.objectifs} onChange={e => update('objectifs', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Contre-indications</label><textarea className="input-field resize-none" rows={2} value={form.contreIndications} onChange={e => update('contreIndications', e.target.value)} /></div>
-              <div><label className="block text-sm text-surface-600 mb-1">Notes privees (non visibles par le client)</label><textarea className="input-field resize-none" rows={2} value={form.notesPrivees} onChange={e => update('notesPrivees', e.target.value)} /></div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
+            )}
+            <div>
+              <label className="block text-sm text-surface-600 mb-1.5">Prenom</label>
+              <input className="input-field" value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} required placeholder="Ex: Mohamed" />
             </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary">Annuler</button>
-            <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Enregistrement...' : isEdit ? 'Mettre a jour' : 'Creer le client'}</button>
-          </div>
-        </form>
+            <div>
+              <label className="block text-sm text-surface-600 mb-1.5">Nom</label>
+              <input className="input-field" value={form.lastName} onChange={e => setForm(p => ({ ...p, lastName: e.target.value }))} required placeholder="Ex: Dupont" />
+            </div>
+            <div>
+              <label className="block text-sm text-surface-600 mb-1.5">Email</label>
+              <input className="input-field" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required placeholder="email@exemple.com" />
+            </div>
+            <button type="submit" disabled={saving} className="btn-primary w-full justify-center">
+              {saving ? 'Creation...' : 'Creer le client'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   )
@@ -140,7 +106,6 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [editClient, setEditClient] = useState(null)
 
   const fetchClients = async () => {
     const res = await fetch('/api/clients')
@@ -152,19 +117,17 @@ export default function ClientsPage() {
 
   const filtered = clients.filter(c => {
     const q = search.toLowerCase()
-    return `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.includes(q)
+    return `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q)
   })
-
-  const handleSave = () => { setShowModal(false); setEditClient(null); fetchClients() }
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-display text-surface-950">Clients</h1>
-          <p className="text-sm text-surface-500 mt-1">{clients.length} client{clients.length > 1 ? 's' : ''} enregistre{clients.length > 1 ? 's' : ''}</p>
+          <p className="text-sm text-surface-500 mt-1">{clients.length} client{clients.length > 1 ? 's' : ''}</p>
         </div>
-        <button onClick={() => { setEditClient(null); setShowModal(true) }} className="btn-primary">
+        <button onClick={() => setShowModal(true)} className="btn-primary">
           <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
           Nouveau client
         </button>
@@ -193,13 +156,15 @@ export default function ClientsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-surface-950">{client.firstName} {client.lastName}</p>
-                  <p className="text-xs text-surface-500 truncate">
-                    {client.motifConsultation ? client.motifConsultation.slice(0, 60) + (client.motifConsultation.length > 60 ? '...' : '') : [client.email, client.phone].filter(Boolean).join(' -- ') || 'Pas de motif renseigne'}
-                  </p>
+                  <p className="text-xs text-surface-500 truncate">{client.email}</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-3">
-                  <span className="text-xs text-surface-500">{client._count?.seances || 0} seance{(client._count?.seances || 0) > 1 ? 's' : ''}</span>
-                  <span className={client.status === 'ACTIF' ? 'badge-success' : 'badge-neutral'}>{client.status === 'ACTIF' ? 'Actif' : 'Inactif'}</span>
+                  <span className="text-xs text-surface-500">{client._count?.programmes || 0} programme{(client._count?.programmes || 0) > 1 ? 's' : ''}</span>
+                  {client.adherentUserId ? (
+                    <span className="badge-success">Compte actif</span>
+                  ) : (
+                    <span className="badge-neutral">Sans compte</span>
+                  )}
                 </div>
                 <svg className="w-4 h-4 text-surface-300" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
               </div>
@@ -208,7 +173,7 @@ export default function ClientsPage() {
         </div>
       )}
 
-      {showModal && <ClientModal client={editClient} onClose={() => { setShowModal(false); setEditClient(null) }} onSave={handleSave} />}
+      {showModal && <NewClientModal onClose={() => setShowModal(false)} onSave={() => { setShowModal(false); fetchClients() }} />}
     </div>
   )
 }

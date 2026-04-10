@@ -41,9 +41,9 @@ export default function ConnexionPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-surface-950 tracking-tight">Lurn <span className="font-normal text-surface-600">Serenity</span></h1>
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400 mt-1">L'excellence au service du bien-etre</p>
-          <p className="text-sm text-surface-500 mt-2">Connectez-vous a votre espace</p>
+          <h1 className="text-2xl font-semibold text-surface-950 tracking-tight">City <span className="font-normal text-surface-600">Coaching</span></h1>
+          <p className="text-xs font-medium uppercase tracking-widest text-brand-400 mt-1">Votre salle de sport</p>
+          <p className="text-sm text-surface-500 mt-2">Connectez-vous à votre espace</p>
         </div>
 
         {/* Form */}

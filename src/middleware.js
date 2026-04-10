@@ -2,7 +2,7 @@ import { getToken } from 'next-auth/jwt'
 import { NextResponse } from 'next/server'
 
 const publicPages = ['/connexion', '/inscription', '/tarifs']
-const protectedApiPrefixes = ['/api/clients', '/api/seances', '/api/factures', '/api/notes']
+const protectedApiPrefixes = ['/api/clients', '/api/programmes', '/api/equipements', '/api/exercices']
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
@@ -13,7 +13,7 @@ export async function middleware(request) {
   }
 
   // Public APIs - no auth needed
-  if (pathname.startsWith('/api/register') || pathname.startsWith('/api/stripe') || pathname.startsWith('/api/admin') || pathname.startsWith('/api/auth')) {
+  if (pathname.startsWith('/api/register') || pathname.startsWith('/api/auth')) {
     return NextResponse.next()
   }
 
@@ -24,24 +24,12 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/connexion', request.url))
   }
 
-  // Check subscription for app pages and protected APIs
-  const isAppPage = pathname === '/' || pathname.startsWith('/clients') || pathname.startsWith('/agenda') || pathname.startsWith('/facturation') || pathname.startsWith('/parametres')
-  const isProtectedApi = protectedApiPrefixes.some(p => pathname.startsWith(p))
-
-  if (isAppPage || isProtectedApi) {
-    // Admin bypass - always allowed
-    if (token.role === 'ADMIN') {
+  // Adhérent : accès uniquement à /adherent et /api/adherent
+  if (token.role === 'ADHERENT') {
+    if (pathname.startsWith('/adherent') || pathname.startsWith('/api/adherent')) {
       return NextResponse.next()
     }
-
-    // Check subscription via a lightweight DB-free approach using token claims
-    // We'll add subscription status to the JWT token
-    if (!token.subscriptionActive) {
-      if (isProtectedApi) {
-        return NextResponse.json({ error: 'Abonnement requis' }, { status: 403 })
-      }
-      return NextResponse.redirect(new URL('/tarifs', request.url))
-    }
+    return NextResponse.redirect(new URL('/adherent', request.url))
   }
 
   return NextResponse.next()
@@ -51,13 +39,14 @@ export const config = {
   matcher: [
     '/',
     '/clients/:path*',
-    '/agenda/:path*',
-    '/facturation/:path*',
-    '/parametres/:path*',
+    '/programmes/:path*',
+    '/equipements/:path*',
+    '/adherent/:path*',
     '/api/clients/:path*',
-    '/api/seances/:path*',
-    '/api/factures/:path*',
-    '/api/notes/:path*',
+    '/api/programmes/:path*',
+    '/api/equipements/:path*',
+    '/api/exercices/:path*',
+    '/api/adherent/:path*',
     '/connexion',
     '/inscription',
     '/tarifs',

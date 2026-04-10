@@ -5,8 +5,8 @@ import SessionProvider from '@/components/SessionProvider'
 import AppShell from '@/components/AppShell'
 
 export const metadata = {
-  title: 'Lurn Serenity -- Gestion Cabinet Bien-Etre',
-  description: 'Lurn Serenity - La solution premium de gestion pour les professionnels du bien-etre.',
+  title: 'City Coaching -- Salle de sport',
+  description: 'City Coaching - Programmes et suivi personnalise pour votre salle de sport.',
 }
 
 export default async function RootLayout({ children }) {

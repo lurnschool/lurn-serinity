@@ -8,8 +8,9 @@ const publicPages = ['/connexion', '/inscription', '/tarifs']
 export default function AppShell({ children }) {
   const pathname = usePathname()
   const isPublic = publicPages.includes(pathname)
+  const isAdherent = pathname.startsWith('/adherent')
 
-  if (isPublic) {
+  if (isPublic || isAdherent) {
     return <main className="min-h-screen">{children}</main>
   }
 
