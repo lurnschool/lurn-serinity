@@ -67,10 +67,7 @@ function NewClientModal({ onClose, onSave }) {
               </div>
             </div>
             <p className="text-xs text-surface-400 text-center">
-              {result.emailSent
-                ? <span className="text-brand-400">✓ Un email avec les identifiants a ete envoye a l&apos;adherent.</span>
-                : <>Communique ces identifiants a l&apos;adherent. Il pourra se connecter et choisir son programme.</>
-              }
+              Communique ces identifiants a l&apos;adherent. Il pourra se connecter et choisir son programme.
             </p>
             <button onClick={onSave} className="btn-primary w-full justify-center">Fermer</button>
           </div>
