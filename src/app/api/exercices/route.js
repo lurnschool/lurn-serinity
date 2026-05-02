@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 export async function POST(req) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const data = await req.json()
     const exercice = await prisma.exercice.create({

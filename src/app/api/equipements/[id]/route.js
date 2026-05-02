@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 export async function PUT(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const data = await req.json()
     const equipement = await prisma.equipement.update({
@@ -22,6 +26,9 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     await prisma.equipement.delete({ where: { id: params.id } })
     return NextResponse.json({ ok: true })

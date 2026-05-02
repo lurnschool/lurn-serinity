@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 export async function GET(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const programme = await prisma.programme.findUnique({
       where: { id: params.id },
@@ -15,6 +19,9 @@ export async function GET(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const data = await req.json()
     const programme = await prisma.programme.update({
@@ -35,6 +42,9 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     await prisma.programme.delete({ where: { id: params.id } })
     return NextResponse.json({ ok: true })

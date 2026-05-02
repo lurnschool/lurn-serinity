@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 // DELETE - supprimer un client et son compte adherent
 export async function DELETE(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const client = await prisma.client.findUnique({ where: { id: params.id } })
     if (!client) return NextResponse.json({ error: 'Client introuvable' }, { status: 404 })

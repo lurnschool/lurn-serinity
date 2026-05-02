@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { requireCoach } from '@/lib/api-auth'
 
 // Créer un compte adhérent pour un client
 export async function POST(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const { email, password } = await req.json()
     const client = await prisma.client.findUnique({ where: { id: params.id } })
@@ -36,6 +40,9 @@ export async function POST(req, { params }) {
 
 // Supprimer le compte adhérent
 export async function DELETE(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const client = await prisma.client.findUnique({ where: { id: params.id } })
     if (!client?.adherentUserId) return NextResponse.json({ error: 'Pas de compte' }, { status: 404 })

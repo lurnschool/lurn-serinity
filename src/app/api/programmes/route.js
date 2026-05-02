@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 export async function GET() {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const programmes = await prisma.programme.findMany({
       include: { exercices: { include: { equipement: true }, orderBy: { ordre: 'asc' } } },
@@ -14,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const data = await req.json()
     const programme = await prisma.programme.create({

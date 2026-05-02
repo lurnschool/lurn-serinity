@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { requireCoach } from '@/lib/api-auth'
 
 export async function GET() {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   const clients = await prisma.client.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
@@ -13,6 +17,9 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const { firstName, lastName, email } = await request.json()
 
@@ -64,6 +71,9 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   const { id, ...data } = await request.json()
   const client = await prisma.client.update({
     where: { id },

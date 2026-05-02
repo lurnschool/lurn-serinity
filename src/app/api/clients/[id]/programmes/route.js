@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireCoach } from '@/lib/api-auth'
 
 // Lister les programmes d'un client
 export async function GET(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const links = await prisma.clientProgramme.findMany({
       where: { clientId: params.id },
@@ -20,6 +24,9 @@ export async function GET(req, { params }) {
 
 // Assigner un programme à un client
 export async function POST(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const { programmeId } = await req.json()
     const link = await prisma.clientProgramme.create({
@@ -35,6 +42,9 @@ export async function POST(req, { params }) {
 
 // Retirer un programme d'un client
 export async function DELETE(req, { params }) {
+  const auth = await requireCoach()
+  if (auth.error) return auth.error
+
   try {
     const { programmeId } = await req.json()
     await prisma.clientProgramme.delete({
