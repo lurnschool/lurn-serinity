@@ -53,23 +53,45 @@ function NewClientModal({ onClose, onSave }) {
               </svg>
             </div>
             <div className="text-center">
-              <p className="text-base font-semibold text-surface-950">Client cree avec succes</p>
-              <p className="text-sm text-surface-500 mt-1">Voici ses identifiants de connexion :</p>
+              <p className="text-base font-semibold text-surface-950">Compte adherent cree</p>
+              <p className="text-sm text-surface-500 mt-1">Mot de passe temporaire genere</p>
             </div>
-            <div className="p-4 bg-surface-50 border border-surface-200 rounded-xl space-y-2">
-              <div className="flex justify-between">
-                <span className="text-sm text-surface-500">Email</span>
-                <span className="text-sm font-medium text-surface-950">{form.email}</span>
+
+            {/* Avertissement single-use : ce MdP ne sera plus jamais réaffichable */}
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5">
+              <svg className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+              <p className="text-xs text-amber-700">
+                Ce mot de passe est <strong>affiche une seule fois</strong>. Communiquez-le directement a l&apos;adherent (SMS, en main propre). L&apos;adherent devra le changer a sa premiere connexion.
+              </p>
+            </div>
+
+            <div className="p-4 bg-surface-50 border border-surface-200 rounded-xl space-y-3">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-surface-400 mb-1">Email</p>
+                <p className="text-sm font-medium text-surface-950 break-all">{form.email}</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-surface-500">Mot de passe</span>
-                <span className="text-sm font-mono font-medium text-brand-400">{result.password}</span>
+              <div>
+                <p className="text-xs uppercase tracking-wider text-surface-400 mb-1">Mot de passe temporaire</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm font-mono font-semibold text-surface-950 bg-white px-3 py-2 rounded-lg border border-surface-200 break-all select-all">
+                    {result.temporaryPassword}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard?.writeText(result.temporaryPassword)}
+                    className="px-3 py-2 rounded-lg border border-surface-200 hover:bg-surface-100 text-xs font-medium text-surface-700 shrink-0"
+                  >
+                    Copier
+                  </button>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-surface-400 text-center">
-              Communique ces identifiants a l&apos;adherent. Il pourra se connecter et choisir son programme.
-            </p>
-            <button onClick={onSave} className="btn-primary w-full justify-center">Fermer</button>
+
+            <button onClick={onSave} className="btn-primary w-full justify-center">
+              J&apos;ai transmis les identifiants
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">

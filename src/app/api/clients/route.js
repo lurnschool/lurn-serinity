@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { requireCoach } from '@/lib/api-auth'
+import { generateTemporaryPassword } from '@/lib/password'
 
 export async function GET() {
   const auth = await requireCoach()
@@ -38,21 +39,22 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Cet email est deja utilise' }, { status: 400 })
     }
 
-    // Generate a simple default password: first name + "2026"
-    const defaultPassword = `${firstName.toLowerCase()}2026`
-    const hashed = await bcrypt.hash(defaultPassword, 10)
+    // PR 2B : MdP temporaire fort, jamais affiché ailleurs qu'à la création.
+    // L'adhérent est forcé de le changer à la première connexion.
+    const temporaryPassword = generateTemporaryPassword(16)
+    const hashed = await bcrypt.hash(temporaryPassword, 12)
 
-    // Create adherent user account
     const user = await prisma.user.create({
       data: {
         name: `${firstName} ${lastName}`,
         email,
         password: hashed,
         role: 'ADHERENT',
+        mustChangePassword: true,
+        passwordTempCreatedAt: new Date(),
       },
     })
 
-    // Create client linked to account
     const client = await prisma.client.create({
       data: {
         firstName,
@@ -63,7 +65,13 @@ export async function POST(request) {
       },
     })
 
-    return NextResponse.json({ client, password: defaultPassword })
+    // Le password est retourné UNE SEULE FOIS, à afficher au coach
+    // dans une modale dédiée. Plus jamais réaffichable côté serveur.
+    return NextResponse.json({
+      client,
+      temporaryPassword,
+      mustChangePassword: true,
+    })
   } catch (e) {
     if (e.code === 'P2002') return NextResponse.json({ error: 'Cet email est deja utilise' }, { status: 400 })
     return NextResponse.json({ error: e.message }, { status: 500 })
