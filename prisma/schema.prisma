@@ -132,6 +132,7 @@ model Client {
   programmes    ClientProgramme[]
   progressions  Progression[]
   mesures       Mesure[]
+  workoutLogs   WorkoutLog[]
 }
 
 // Suivi des mensurations dans le temps
@@ -147,10 +148,20 @@ model Mesure {
   clientId    String
 }
 
-// Table de liaison Client <-> Programme
+// Table de liaison Client <-> Programme — enrichie en PR 2C
 model ClientProgramme {
   id          String   @id @default(cuid())
   assignedAt  DateTime @default(now())
+
+  // PR 2C — suivi de l'assignation
+  startDate            DateTime?
+  endDate              DateTime?
+  status               String    @default("ACTIF")  // ACTIF | PAUSE | TERMINE | ARCHIVE
+  currentWeek          Int       @default(1)
+  currentSession       Int       @default(1)
+  coachNotes           String    @default("")
+  personalAdaptations  Json?
+  updatedAt            DateTime  @default(now()) @updatedAt
 
   client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String
@@ -158,7 +169,12 @@ model ClientProgramme {
   programme   Programme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
   programmeId String
 
+  workoutLogs WorkoutLog[]
+
   @@unique([clientId, programmeId])
+  @@index([clientId])
+  @@index([status])
+  @@index([startDate])
 }
 
 // Notes d'evolution - timeline du suivi
@@ -225,9 +241,10 @@ model Programme {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  exercices    Exercice[]
+  exercices    Exercice[]              // legacy v1, conservé en compat. Sera déprécié post PR 4.
   clients      ClientProgramme[]
   progressions Progression[]
+  weeks        ProgrammeWeek[]         // PR 2C — structure premium
 }
 
 model Exercice {
@@ -280,4 +297,179 @@ model Equipement {
   updatedAt   DateTime   @updatedAt
 
   exercices   Exercice[]
+}
+
+// ====================================================================
+// PR 2C — Modèle sportif premium (additif, sans drop)
+// ====================================================================
+
+/// Bibliothèque d'exercices réutilisable, indépendante des programmes.
+/// Soft delete via isActive=false ou archivedAt set (jamais de DELETE dur
+/// si l'exercice est référencé par au moins un SessionExercise).
+model ExerciseLibrary {
+  id                     String    @id @default(cuid())
+  name                   String
+  slug                   String    @unique
+  description            String    @default("")
+  /// Groupe musculaire principal : PECTORAUX | DOS | EPAULES | BICEPS |
+  /// TRICEPS | JAMBES | FESSIERS | ABDOS | MOLLETS | AVANT_BRAS |
+  /// FULL_BODY | CARDIO
+  primaryMuscleGroup     String
+  /// Groupes musculaires secondaires (mêmes valeurs).
+  secondaryMuscleGroups  String[]  @default([])
+  /// Identifiants équipement (string libre pour rester souple :
+  /// "barbell", "dumbbell", "cable", "machine_leg_press", etc.).
+  equipment              String[]  @default([])
+  /// DEBUTANT | INTERMEDIAIRE | AVANCE
+  level                  String    @default("DEBUTANT")
+  /// Tags d'objectif compatibles : PRISE_MASSE | PERTE_POIDS |
+  /// REMISE_FORME | ENDURANCE | FORCE | SOUPLESSE.
+  goalTags               String[]  @default([])
+  instructions           String    @default("")
+  commonMistakes         String[]  @default([])
+  contraindications      String[]  @default([])
+  mediaUrl               String?
+  /// Soft-delete : false = archivé.
+  isActive               Boolean   @default(true)
+  archivedAt             DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  sessionExercises       SessionExercise[]
+
+  @@index([primaryMuscleGroup])
+  @@index([level])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+/// Une semaine d'un programme.
+model ProgrammeWeek {
+  id           String   @id @default(cuid())
+  programmeId  String
+  weekNumber   Int
+  title        String   @default("")
+  description  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  programme    Programme          @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  sessions     ProgrammeSession[]
+
+  @@unique([programmeId, weekNumber])
+  @@index([programmeId])
+}
+
+/// Une séance dans une semaine.
+model ProgrammeSession {
+  id                       String   @id @default(cuid())
+  programmeWeekId          String
+  sessionNumber            Int
+  title                    String   @default("")
+  /// Focus de la séance : "Push", "Pull", "Jambes", "Cardio HIIT"…
+  focus                    String   @default("")
+  estimatedDurationMinutes Int      @default(45)
+  notes                    String   @default("")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  programmeWeek    ProgrammeWeek    @relation(fields: [programmeWeekId], references: [id], onDelete: Cascade)
+  sessionExercises SessionExercise[]
+  workoutLogs      WorkoutLog[]
+
+  @@unique([programmeWeekId, sessionNumber])
+  @@index([programmeWeekId])
+}
+
+/// Prescription d'un exercice de la bibliothèque dans une séance.
+/// Sépare strictement la bibliothèque (`ExerciseLibrary`) de la prescription.
+model SessionExercise {
+  id                  String   @id @default(cuid())
+  programmeSessionId  String
+  exerciseLibraryId   String
+  /// Ordre d'exécution dans la séance (1, 2, 3, …).
+  order               Int
+  sets                Int      @default(3)
+  repsMin             Int      @default(8)
+  repsMax             Int      @default(12)
+  /// Charge cible textuelle libre : "12kg", "60% 1RM", "à ressenti".
+  targetLoad          String   @default("")
+  restSeconds         Int      @default(60)
+  /// Tempo "3-1-1-0" (concentrique-pause-excentrique-pause).
+  tempo               String   @default("")
+  /// RPE cible 1-10.
+  targetRpe           Int?
+  coachNotes          String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  programmeSession  ProgrammeSession @relation(fields: [programmeSessionId], references: [id], onDelete: Cascade)
+  exerciseLibrary   ExerciseLibrary  @relation(fields: [exerciseLibraryId], references: [id])
+  workoutSetLogs    WorkoutSetLog[]
+
+  @@index([programmeSessionId])
+  @@index([exerciseLibraryId])
+}
+
+/// Historique d'exécution d'une séance par un adhérent (=performance réelle).
+/// Distinct de la prescription (qui est dans ProgrammeSession + SessionExercise).
+model WorkoutLog {
+  id                   String    @id @default(cuid())
+  clientId             String
+  /// Lien vers l'assignation (programme suivi). Nullable pour permettre les
+  /// séances libres (hors programme).
+  clientProgrammeId    String?
+  /// Séance prescrite référencée. Nullable si séance libre.
+  programmeSessionId   String?
+  startedAt            DateTime  @default(now())
+  completedAt          DateTime?
+  /// PLANNED | IN_PROGRESS | COMPLETED | SKIPPED | CANCELLED
+  status               String    @default("IN_PROGRESS")
+  /// Difficulté ressentie globale 1-10 (RPE séance).
+  perceivedDifficulty  Int?
+  clientNotes          String    @default("")
+  coachReviewNotes     String    @default("")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  client            Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientProgramme   ClientProgramme?  @relation(fields: [clientProgrammeId], references: [id], onDelete: SetNull)
+  programmeSession  ProgrammeSession? @relation(fields: [programmeSessionId], references: [id], onDelete: SetNull)
+  workoutSetLogs    WorkoutSetLog[]
+
+  @@index([clientId])
+  @@index([clientProgrammeId])
+  @@index([programmeSessionId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+/// Une série effectivement réalisée pendant un WorkoutLog.
+model WorkoutSetLog {
+  id                String   @id @default(cuid())
+  workoutLogId      String
+  /// Référence à l'exercice prescrit. Nullable pour les séries libres
+  /// (échauffement, exercice ad-hoc).
+  sessionExerciseId String?
+  setNumber         Int
+  /// Cible texte (ex: "8-12"). Conservé pour audit/comparaison.
+  targetReps        String   @default("")
+  /// Reps réellement effectuées.
+  actualReps        Int?
+  /// Cible texte (ex: "12kg", "à ressenti").
+  targetLoad        String   @default("")
+  /// Charge réelle en kg (Float pour 12.5kg etc.).
+  actualLoad        Float?
+  /// RPE 1-10 ressenti sur cette série.
+  rpe               Int?
+  completed         Boolean  @default(false)
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  workoutLog       WorkoutLog       @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  sessionExercise  SessionExercise? @relation(fields: [sessionExerciseId], references: [id], onDelete: SetNull)
+
+  @@index([workoutLogId])
+  @@index([sessionExerciseId])
 }
