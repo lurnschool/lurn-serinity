@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Brand sport — vert électrique sobre.
         brand: {
           50:  '#f0fdf4',
           100: '#dcfce7',
@@ -20,56 +21,96 @@ module.exports = {
           800: '#166534',
           900: '#14532d',
         },
+        // Surfaces sombres — dark mode par défaut.
         surface: {
-          0:   '#0f0f11',
-          50:  '#16161a',
-          100: '#1c1c21',
-          200: '#26262d',
-          300: '#32323b',
-          400: '#4a4a57',
-          500: '#6b6b7a',
-          600: '#8e8e9d',
-          700: '#ababba',
+          0:   '#0b0b0d',
+          50:  '#121215',
+          100: '#181820',
+          200: '#22222b',
+          300: '#2d2d38',
+          400: '#3f3f4d',
+          500: '#5e5e6f',
+          600: '#8585a0',
+          700: '#aaaabd',
           800: '#cdcdd8',
           900: '#e8e8ef',
           950: '#f5f5f8',
         },
+        // Sémantique — couleurs métier constantes.
+        success: { DEFAULT: '#22c55e', soft: 'rgba(34, 197, 94, 0.12)', border: 'rgba(34, 197, 94, 0.25)' },
+        warning: { DEFAULT: '#f59e0b', soft: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.25)' },
+        danger:  { DEFAULT: '#ef4444', soft: 'rgba(239, 68, 68, 0.12)',  border: 'rgba(239, 68, 68, 0.25)' },
+        info:    { DEFAULT: '#3b82f6', soft: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.25)' },
+        // Catégories — pour tagging programmes / objectifs.
+        cat: {
+          masse:    '#a855f7', // prise de masse — violet
+          perte:    '#f97316', // perte de poids — orange
+          forme:    '#3b82f6', // remise en forme — bleu
+          endurance:'#10b981', // endurance — vert d'eau
+          force:    '#ef4444', // force — rouge
+          mobilite: '#14b8a6', // souplesse — teal
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
-        'display': ['2.25rem', { lineHeight: '1.15', letterSpacing: '-0.03em', fontWeight: '600' }],
-        'title':   ['1.375rem', { lineHeight: '1.25', letterSpacing: '-0.02em', fontWeight: '600' }],
-        'heading': ['1.0625rem', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '500' }],
+        // Hiérarchie stricte — voir docs/product/benchmark-fitness-apps.md.
+        'caption': ['0.6875rem', { lineHeight: '1.4', letterSpacing: '0.04em', fontWeight: '500' }],
+        'micro':   ['0.75rem',   { lineHeight: '1.4',  fontWeight: '500' }],
+        'body':    ['0.875rem',  { lineHeight: '1.5',  fontWeight: '400' }],
+        'heading': ['1.0625rem', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'title':   ['1.375rem',  { lineHeight: '1.25', letterSpacing: '-0.02em', fontWeight: '600' }],
+        'display': ['2.25rem',   { lineHeight: '1.1',  letterSpacing: '-0.03em', fontWeight: '700' }],
+        'hero':    ['3rem',      { lineHeight: '1.05', letterSpacing: '-0.035em', fontWeight: '700' }],
+      },
+      spacing: {
+        // Grille 4px stricte — déjà dans Tailwind, on ajoute juste les
+        // valeurs orientées composants.
+        'safe-bottom': 'env(safe-area-inset-bottom, 0px)',
+        'nav-h':       '3.5rem', // hauteur header mobile
+        'bottomnav-h': '4.25rem', // hauteur bottom nav adhérent
+        'sidebar-w':   '16rem',
       },
       borderRadius: {
-        '2xl': '1rem',
-        '3xl': '1.25rem',
+        'sm':  '0.375rem',
+        'md':  '0.5rem',
+        'lg':  '0.75rem',
+        'xl':  '1rem',
+        '2xl': '1.25rem',
+        '3xl': '1.5rem',
+        'pill':'9999px',
       },
       boxShadow: {
-        'card': '0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.03)',
-        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(212, 160, 78, 0.15)',
-        'modal': '0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+        'card':       '0 1px 2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(34, 197, 94, 0.18)',
+        'modal':      '0 32px 80px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+        'glow-brand': '0 0 24px rgba(34, 197, 94, 0.35)',
+        'inset-soft': 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.4s ease-out forwards',
-        'slide-up': 'slideUp 0.35s ease-out forwards',
-        'slide-in': 'slideIn 0.3s ease-out forwards',
+        'fade-in':   'fadeIn 0.3s ease-out forwards',
+        'slide-up':  'slideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'slide-in':  'slideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'pop':       'pop 0.18s ease-out forwards',
+        'pulse-soft':'pulseSoft 2.4s ease-in-out infinite',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        slideIn: {
-          '0%': { opacity: '0', transform: 'translateX(-8px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
+        fadeIn:    { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        slideUp:   { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        slideIn:   { '0%': { opacity: '0', transform: 'translateX(-6px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
+        pop:       { '0%': { transform: 'scale(0.97)' }, '100%': { transform: 'scale(1)' } },
+        pulseSoft: { '0%, 100%': { opacity: '0.6' }, '50%': { opacity: '1' } },
+      },
+      transitionTimingFunction: {
+        'out-back': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'snap':     'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      maxWidth: {
+        'app':     '80rem',  // 1280px — coach
+        'reading': '42rem',  // forms longs
+        'mobile':  '28rem',  // adhérent contenu
       },
     },
   },
