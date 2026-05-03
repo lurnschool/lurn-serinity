@@ -35,6 +35,19 @@ model User {
   googleCalendarId     String?   @default("primary")
   googleTokenExpiry    DateTime?
 
+  // Sécurité credentials (PR 2B)
+  // Forcer changement de mot de passe à la première connexion (compte créé par coach).
+  mustChangePassword     Boolean   @default(false)
+  // Date du dernier changement de mot de passe (audit, expiration future).
+  passwordChangedAt      DateTime?
+  // Date de génération d'un mot de passe temporaire (pour expiration éventuelle).
+  passwordTempCreatedAt  DateTime?
+  // Version de session — incrémentée à chaque changement de mot de passe ;
+  // permet d'invalider les sessions JWT existantes via comparaison serveur.
+  sessionVersion         Int       @default(0)
+  // Audit : derniere connexion réussie.
+  lastLoginAt            DateTime?
+
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
