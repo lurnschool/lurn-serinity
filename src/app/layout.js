@@ -5,8 +5,17 @@ import SessionProvider from '@/components/SessionProvider'
 import AppShell from '@/components/AppShell'
 
 export const metadata = {
-  title: 'City Coaching -- Salle de sport',
-  description: 'City Coaching - Programmes et suivi personnalise pour votre salle de sport.',
+  title: 'City Coaching — Votre salle de sport',
+  description: 'City Coaching — Programmes premium et suivi personnalisé pour votre salle de sport.',
+  icons: {
+    icon: '/logo-city-coaching.png',
+    apple: '/logo-city-coaching.png',
+  },
+  openGraph: {
+    title: 'City Coaching',
+    description: 'Programmes premium et suivi personnalisé pour votre salle de sport.',
+    images: ['/logo-city-coaching.png'],
+  },
 }
 
 export default async function RootLayout({ children }) {

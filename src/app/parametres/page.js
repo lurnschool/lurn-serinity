@@ -138,10 +138,10 @@ export default function ParametresPage() {
 
       {/* App info */}
       <div className="card p-6">
-        <h2 className="text-heading text-surface-950 mb-3">A propos</h2>
+        <h2 className="text-heading text-surface-950 mb-3">À propos</h2>
         <div className="space-y-2 text-sm text-surface-600">
-          <p>Lurn Serenity v1.0</p>
-          <p>Gestion de cabinet pour professionnels du bien-etre</p>
+          <p>City Coaching — TrackCoach v1</p>
+          <p>Programmes premium et suivi personnalisé pour ta salle de sport.</p>
         </div>
       </div>
     </div>

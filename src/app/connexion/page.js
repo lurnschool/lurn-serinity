@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function ConnexionPage() {
   const router = useRouter()
@@ -33,15 +34,10 @@ export default function ConnexionPage() {
   return (
     <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
+        {/* Logo officiel */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-semibold text-surface-950 tracking-tight">City <span className="font-normal text-surface-600">Coaching</span></h1>
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400 mt-1">Votre salle de sport</p>
+          <BrandLogo size="3xl" variant="light" className="mx-auto mb-3" />
+          <p className="text-xs font-medium uppercase tracking-widest text-brand-400">Votre salle de sport</p>
           <p className="text-sm text-surface-500 mt-2">Connectez-vous à votre espace</p>
         </div>
 

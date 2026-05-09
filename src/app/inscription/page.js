@@ -76,16 +76,12 @@ export default function InscriptionPage() {
   return (
     <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
+        {/* Logo officiel */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-semibold text-surface-950 tracking-tight">Lurn <span className="font-normal text-surface-600">Serenity</span></h1>
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400 mt-1">L'excellence au service du bien-etre</p>
-          <p className="text-sm text-surface-500 mt-2">Creez votre espace praticien</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-20 w-auto mx-auto mb-3 select-none" draggable={false} />
+          <p className="text-xs font-medium uppercase tracking-widest text-brand-400">Votre salle de sport</p>
+          <p className="text-sm text-surface-500 mt-2">Crée ton espace coach</p>
         </div>
 
         {/* Form */}

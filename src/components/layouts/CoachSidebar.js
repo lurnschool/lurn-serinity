@@ -10,6 +10,7 @@ import {
 } from './icons'
 import Avatar from '../ui/Avatar'
 import IconButton from '../ui/IconButton'
+import BrandLogo from '../BrandLogo'
 import { cn } from '../ui/utils'
 
 const NAV_GROUPS = [
@@ -71,16 +72,8 @@ function NavLink({ item, active, onClick }) {
 
 function Brand() {
   return (
-    <Link href="/" className="flex items-center gap-2.5 group">
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-400 via-brand-500 to-brand-600 shadow-glow-brand flex items-center justify-center transition-transform group-hover:scale-105">
-        <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" strokeWidth={2.4} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 4.5v15M3 7.5v9M17.25 4.5v15M21 7.5v9M6.75 12h10.5"/>
-        </svg>
-      </div>
-      <div className="leading-tight">
-        <p className="text-sm font-bold text-surface-950 tracking-tight">TrackCoach</p>
-        <p className="text-[10px] font-medium text-surface-500 uppercase tracking-[0.14em]">City Coaching</p>
-      </div>
+    <Link href="/" className="flex items-center group transition-transform hover:scale-[1.02]">
+      <BrandLogo size="lg" variant="light" alt="City Coaching" />
     </Link>
   )
 }
