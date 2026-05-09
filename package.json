@@ -9,7 +9,9 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:status": "prisma migrate status",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "seed:exercise-library": "node prisma/seed-exercise-library.js",
+    "test:seed": "node prisma/seed-exercise-library.test.js"
   },
   "dependencies": {
     "@prisma/client": "^5.13.0",
