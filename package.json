@@ -11,6 +11,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
     "seed:exercise-library": "node prisma/seed-exercise-library.js",
+    "seed:templates": "node prisma/seed-templates.js",
     "test:seed": "node prisma/seed-exercise-library.test.js",
     "create-coach": "node prisma/create-coach.js"
   },

@@ -6,7 +6,8 @@ import IconButton from '../ui/IconButton'
 
 const ROUTE_LABELS = {
   '/':            { eyebrow: 'Pilotage',    title: 'Tableau de bord' },
-  '/agenda':      { eyebrow: 'Pilotage',    title: 'Agenda' },
+  '/agenda':                  { eyebrow: 'Pilotage',    title: 'Agenda' },
+  '/seances-adherents':       { eyebrow: 'Pilotage',    title: 'Séances live' },
   '/clients':                 { eyebrow: 'Salle',       title: 'Adhérents' },
   '/programmes':              { eyebrow: 'Salle',       title: 'Programmes' },
   '/exercices-bibliotheque':  { eyebrow: 'Salle',       title: 'Bibliothèque' },
