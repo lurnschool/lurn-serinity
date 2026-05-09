@@ -11,7 +11,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
     "seed:exercise-library": "node prisma/seed-exercise-library.js",
-    "test:seed": "node prisma/seed-exercise-library.test.js"
+    "test:seed": "node prisma/seed-exercise-library.test.js",
+    "create-coach": "node prisma/create-coach.js"
   },
   "dependencies": {
     "@prisma/client": "^5.13.0",

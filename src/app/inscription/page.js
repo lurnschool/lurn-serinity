@@ -74,13 +74,20 @@ export default function InscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-surface-0 flex items-center justify-center px-4 py-12 relative">
+      {/* Background fitness avec overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-40"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1600&q=80')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface-0/85 via-surface-0/90 to-surface-0" />
+
+      <div className="relative z-10 w-full max-w-md">
         {/* Logo officiel */}
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-20 w-auto mx-auto mb-3 select-none" draggable={false} />
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400">Votre salle de sport</p>
+          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-24 w-auto mx-auto mb-3 select-none drop-shadow-[0_4px_24px_rgba(34,197,94,0.4)]" draggable={false} />
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-400">Votre salle de sport</p>
           <p className="text-sm text-surface-500 mt-2">Crée ton espace coach</p>
         </div>
 

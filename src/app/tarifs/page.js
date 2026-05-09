@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
+// Image hero — barre / haltères fitness sombre, libre Unsplash
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=1600&q=80'
+
 const plans = [
   {
     name: 'Essentiel',
@@ -60,15 +63,33 @@ export default function TarifsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-0 flex flex-col items-center px-4 py-12">
-      <div className="w-full max-w-4xl">
-        {/* Logo officiel */}
-        <div className="text-center mb-12">
+    <div className="min-h-screen bg-surface-0">
+      {/* === HERO BAND === */}
+      <div
+        className="relative bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_IMAGE})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-0/85 via-surface-0/75 to-surface-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.18),transparent_60%)]" />
+        <div className="relative max-w-4xl mx-auto px-4 py-16 lg:py-24 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-24 w-auto mx-auto mb-4 select-none" draggable={false} />
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400">Votre salle de sport — programmes premium</p>
-          <h2 className="text-3xl font-semibold text-surface-950 mt-8">Choisissez votre formule</h2>
-          <p className="text-surface-500 mt-2 max-w-lg mx-auto">Programmes structurés, suivi en temps réel, expérience adhérent mobile-first. Démarre avec ta salle.</p>
+          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-20 lg:h-28 w-auto mx-auto mb-5 select-none drop-shadow-[0_4px_24px_rgba(34,197,94,0.4)]" draggable={false} />
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-400">Votre salle de sport · programmes premium</p>
+          <h1 className="text-display lg:text-hero text-white mt-5 leading-tight">
+            Une plateforme à la hauteur<br className="hidden lg:block" />
+            <span className="text-brand-400">de ton ambition.</span>
+          </h1>
+          <p className="text-surface-700 mt-4 max-w-xl mx-auto text-base leading-relaxed">
+            Programmes structurés, suivi en temps réel, expérience adhérent
+            mobile-first. Démarre avec ta salle.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto w-full px-4 py-12">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-semibold text-surface-950">Choisissez votre formule</h2>
+          <p className="text-surface-500 mt-2 max-w-lg mx-auto">Sans engagement, annulable à tout moment.</p>
         </div>
 
         {/* Plans */}
