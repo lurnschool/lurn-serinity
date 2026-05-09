@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import {
   IconDashboard, IconUsers, IconProgrammes, IconDumbbell, IconCalendar,
-  IconBilling, IconSettings, IconLogout, IconMenu, IconClose,
+  IconBilling, IconSettings, IconLogout, IconMenu, IconClose, IconLibrary,
 } from './icons'
 import Avatar from '../ui/Avatar'
 import IconButton from '../ui/IconButton'
@@ -23,9 +23,10 @@ const NAV_GROUPS = [
   {
     label: 'Salle',
     items: [
-      { name: 'Adhérents',       href: '/clients',     Icon: IconUsers },
-      { name: 'Programmes',      href: '/programmes',  Icon: IconProgrammes },
-      { name: 'Équipements',     href: '/equipements', Icon: IconDumbbell },
+      { name: 'Adhérents',        href: '/clients',                Icon: IconUsers },
+      { name: 'Programmes',       href: '/programmes',             Icon: IconProgrammes },
+      { name: 'Bibliothèque',     href: '/exercices-bibliotheque', Icon: IconLibrary },
+      { name: 'Équipements',      href: '/equipements',            Icon: IconDumbbell },
     ],
   },
   {
