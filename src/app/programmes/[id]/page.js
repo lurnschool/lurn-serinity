@@ -351,15 +351,20 @@ export default function ProgrammeBuilderPage() {
 
   const updateMeta = async (patch) => {
     setSaving(true)
-    const res = await fetch(`/api/programme-builder/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-    })
-    setSaving(false)
-    if (res.ok) {
-      const data = await res.json()
-      setProgramme(p => ({ ...p, ...data }))
+    try {
+      const res = await fetch(`/api/programme-builder/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setProgramme(p => ({ ...p, ...data }))
+      }
+    } catch (e) {
+      // ignore — l'utilisateur peut retenter ; on laisse le state propre
+    } finally {
+      setSaving(false)
     }
   }
 

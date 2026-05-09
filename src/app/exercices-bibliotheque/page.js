@@ -213,10 +213,12 @@ function ExerciseFormModal({ open, exercise, onClose, onSaved }) {
         body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok) { setErr(data.error || 'Erreur enregistrement'); setSaving(false); return }
+      if (!res.ok) { setErr(data.error || 'Erreur enregistrement'); return }
       onSaved(data)
     } catch (e2) {
-      setErr(e2?.message || 'Erreur réseau'); setSaving(false)
+      setErr(e2?.message || 'Erreur réseau')
+    } finally {
+      setSaving(false)
     }
   }
 
