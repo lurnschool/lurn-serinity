@@ -20,12 +20,16 @@ import { NextResponse } from 'next/server'
 
 const publicPages = ['/connexion', '/inscription', '/tarifs']
 
-const COACH_PAGE_PREFIXES = ['/clients', '/programmes', '/equipements']
+const COACH_PAGE_PREFIXES = ['/clients', '/programmes', '/equipements', '/exercices-bibliotheque']
 const COACH_API_PREFIXES = [
   '/api/clients',
   '/api/programmes',
   '/api/equipements',
   '/api/exercices',
+  '/api/exercise-library',
+  '/api/programme-builder',
+  '/api/client-programmes',
+  '/api/coach',
 ]
 const COACH_ROLES = new Set(['ADMIN', 'PRATICIEN'])
 
@@ -118,12 +122,17 @@ export const config = {
     '/clients/:path*',
     '/programmes/:path*',
     '/equipements/:path*',
+    '/exercices-bibliotheque/:path*',
     '/adherent/:path*',
     '/change-password',
     '/api/clients/:path*',
     '/api/programmes/:path*',
     '/api/equipements/:path*',
     '/api/exercices/:path*',
+    '/api/exercise-library/:path*',
+    '/api/programme-builder/:path*',
+    '/api/client-programmes/:path*',
+    '/api/coach/:path*',
     '/api/adherent/:path*',
     '/api/auth/change-password',
     '/connexion',

@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
+// Image hero — barre / haltères fitness sombre, libre Unsplash
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=1600&q=80'
+
 const plans = [
   {
     name: 'Essentiel',
@@ -60,19 +63,33 @@ export default function TarifsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-0 flex flex-col items-center px-4 py-12">
-      <div className="w-full max-w-4xl">
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-semibold text-surface-950 tracking-tight">Lurn <span className="font-normal text-surface-600">Serenity</span></h1>
-          <p className="text-xs font-medium uppercase tracking-widest text-brand-400 mt-1">L&apos;excellence au service du bien-etre</p>
-          <h2 className="text-3xl font-semibold text-surface-950 mt-8">Choisissez votre formule</h2>
-          <p className="text-surface-500 mt-2 max-w-lg mx-auto">Des outils pensés pour les professionnels du bien-etre. Commencez a transformer votre pratique des aujourd&apos;hui.</p>
+    <div className="min-h-screen bg-surface-0">
+      {/* === HERO BAND === */}
+      <div
+        className="relative bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_IMAGE})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-0/85 via-surface-0/75 to-surface-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.18),transparent_60%)]" />
+        <div className="relative max-w-4xl mx-auto px-4 py-16 lg:py-24 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-city-coaching.png" alt="City Coaching" className="h-20 lg:h-28 w-auto mx-auto mb-5 select-none drop-shadow-[0_4px_24px_rgba(34,197,94,0.4)]" draggable={false} />
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-400">Votre salle de sport · programmes premium</p>
+          <h1 className="text-display lg:text-hero text-white mt-5 leading-tight">
+            Une plateforme à la hauteur<br className="hidden lg:block" />
+            <span className="text-brand-400">de ton ambition.</span>
+          </h1>
+          <p className="text-surface-700 mt-4 max-w-xl mx-auto text-base leading-relaxed">
+            Programmes structurés, suivi en temps réel, expérience adhérent
+            mobile-first. Démarre avec ta salle.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto w-full px-4 py-12">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-semibold text-surface-950">Choisissez votre formule</h2>
+          <p className="text-surface-500 mt-2 max-w-lg mx-auto">Sans engagement, annulable à tout moment.</p>
         </div>
 
         {/* Plans */}
