@@ -5,8 +5,15 @@ import Link from 'next/link'
 import {
   PageHeader, Button, Card, Badge, Modal, FormField,
   Input, Textarea, Select, EmptyState, LoadingState, ErrorState,
+  Chip, ChipGroup,
 } from '@/components/ui'
 import { IconPlus, IconProgrammes } from '@/components/layouts/icons'
+
+const EQUIP_PRESETS = [
+  'barbell', 'dumbbell', 'kettlebell', 'cable', 'bench', 'rack',
+  'pull_up_bar', 'parallel_bars', 'machine_leg_press', 'machine_lat_pulldown',
+  'rower', 'treadmill', 'jump_rope', 'band', 'mat',
+]
 
 const OBJECTIFS = [
   { value: 'remise_forme', label: 'Remise en forme', variant: 'forme' },
@@ -41,9 +48,13 @@ function CreateProgrammeModal({ open, onClose, onCreated }) {
         body: JSON.stringify({ ...form, duree: Number(form.duree) }),
       })
       const data = await res.json()
-      if (!res.ok) { setErr(data.error || 'Erreur'); setSaving(false); return }
+      if (!res.ok) { setErr(data.error || 'Erreur'); return }
       onCreated(data)
-    } catch (e2) { setErr(e2?.message || 'Erreur réseau'); setSaving(false) }
+    } catch (e2) {
+      setErr(e2?.message || 'Erreur réseau')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -89,6 +100,123 @@ function CreateProgrammeModal({ open, onClose, onCreated }) {
   )
 }
 
+function GenerateAIModal({ open, onClose, onGenerated }) {
+  const [form, setForm] = useState({
+    objectif: 'remise_forme', niveau: 'debutant',
+    weeks: 4, sessionsPerWeek: 3,
+    equipment: ['barbell', 'dumbbell', 'cable'],
+    extraInstructions: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        objectif: 'remise_forme', niveau: 'debutant',
+        weeks: 4, sessionsPerWeek: 3,
+        equipment: ['barbell', 'dumbbell', 'cable'],
+        extraInstructions: '',
+      })
+      setErr('')
+    }
+  }, [open])
+
+  const toggleEquip = (e) => setForm(f => ({
+    ...f,
+    equipment: f.equipment.includes(e) ? f.equipment.filter(x => x !== e) : [...f.equipment, e],
+  }))
+
+  const submit = async (ev) => {
+    ev.preventDefault()
+    setLoading(true); setErr('')
+    try {
+      const res = await fetch('/api/programme-builder/generate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.ok) {
+        setErr(data.error || 'Erreur génération')
+        return
+      }
+      onGenerated(data)
+    } catch (e) {
+      setErr(e?.message || 'Erreur réseau')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={open} onClose={loading ? undefined : onClose}
+      title="Générer un programme avec l'IA"
+      description="L'IA crée la structure complète à partir de tes critères. Tu pourras ajuster ensuite."
+      size="lg"
+      footer={(
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={loading}>Annuler</Button>
+          <Button variant="primary" onClick={submit} loading={loading}
+            leftIcon={!loading && <span className="text-base">✨</span>}>
+            {loading ? 'Génération en cours…' : 'Générer le programme'}
+          </Button>
+        </>
+      )}
+    >
+      <form onSubmit={submit} className="space-y-5">
+        {err && <div className="rounded-xl bg-red-500/10 border border-red-500/25 p-3 text-sm text-red-300">{err}</div>}
+
+        {loading && (
+          <div className="rounded-xl bg-brand-500/5 border border-brand-500/20 p-4 text-sm text-brand-200 flex items-center gap-3">
+            <span className="w-4 h-4 rounded-full border-2 border-brand-300 border-t-transparent animate-spin" />
+            <span>Claude analyse ta bibliothèque, sélectionne les exercices et structure ton programme. ~30 sec.</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <FormField label="Objectif" required>
+            <Select value={form.objectif} onChange={e => setForm({ ...form, objectif: e.target.value })}>
+              {OBJECTIFS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </Select>
+          </FormField>
+          <FormField label="Niveau" required>
+            <Select value={form.niveau} onChange={e => setForm({ ...form, niveau: e.target.value })}>
+              {NIVEAUX.map(n => <option key={n.value} value={n.value}>{n.label}</option>)}
+            </Select>
+          </FormField>
+          <FormField label="Durée (semaines)" hint="1-16">
+            <Input type="number" min={1} max={16} value={form.weeks}
+              onChange={e => setForm({ ...form, weeks: Number(e.target.value) })} />
+          </FormField>
+          <FormField label="Séances par semaine" hint="1-7">
+            <Input type="number" min={1} max={7} value={form.sessionsPerWeek}
+              onChange={e => setForm({ ...form, sessionsPerWeek: Number(e.target.value) })} />
+          </FormField>
+        </div>
+
+        <FormField label="Équipement disponible"
+          hint="Coche ce que ta salle propose. L'IA n'utilisera que ces machines.">
+          <ChipGroup>
+            {EQUIP_PRESETS.map(e => (
+              <Chip key={e} active={form.equipment.includes(e)} onClick={() => toggleEquip(e)}>
+                {e}
+              </Chip>
+            ))}
+          </ChipGroup>
+        </FormField>
+
+        <FormField label="Instructions supplémentaires (optionnel)"
+          hint="Ex : éviter les squats lourds, axer sur les pectoraux, débutant senior, etc.">
+          <Textarea rows={2} value={form.extraInstructions}
+            onChange={e => setForm({ ...form, extraInstructions: e.target.value })}
+            placeholder="Ex: programme orienté esthétique, pas plus de 60 min par séance" />
+        </FormField>
+      </form>
+    </Modal>
+  )
+}
+
 function ProgrammeCard({ programme }) {
   const o = objectif(programme.objectif)
   const n = niveau(programme.niveau)
@@ -124,6 +252,7 @@ export default function ProgrammesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [showAI, setShowAI] = useState(false)
   const [filterObj, setFilterObj] = useState('')
   const [filterNiv, setFilterNiv] = useState('')
 
@@ -150,7 +279,16 @@ export default function ProgrammesPage() {
         eyebrow="Salle"
         title="Programmes"
         subtitle={`${items.length} programme${items.length > 1 ? 's' : ''} disponible${items.length > 1 ? 's' : ''}`}
-        action={<Button variant="primary" leftIcon={<IconPlus className="w-4 h-4" />} onClick={() => setShowCreate(true)}>Nouveau programme</Button>}
+        action={(
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" leftIcon={<span className="text-base">✨</span>} onClick={() => setShowAI(true)}>
+              Générer avec l'IA
+            </Button>
+            <Button variant="primary" leftIcon={<IconPlus className="w-4 h-4" />} onClick={() => setShowCreate(true)}>
+              Nouveau programme
+            </Button>
+          </div>
+        )}
       />
 
       <Card variant="flat" padding="md" className="mb-6">
@@ -189,6 +327,14 @@ export default function ProgrammesPage() {
         open={showCreate}
         onClose={() => setShowCreate(false)}
         onCreated={(p) => { setShowCreate(false); window.location.href = `/programmes/${p.id}` }}
+      />
+      <GenerateAIModal
+        open={showAI}
+        onClose={() => setShowAI(false)}
+        onGenerated={(data) => {
+          setShowAI(false)
+          if (data.programmeId) window.location.href = `/programmes/${data.programmeId}`
+        }}
       />
     </>
   )

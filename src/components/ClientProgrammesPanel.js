@@ -53,9 +53,13 @@ function AssignModal({ open, clientId, onClose, onAssigned }) {
         body: JSON.stringify({ ...form, clientId }),
       })
       const data = await res.json()
-      if (!res.ok) { setErr(data.error || 'Erreur'); setSaving(false); return }
+      if (!res.ok) { setErr(data.error || 'Erreur'); return }
       onAssigned(data)
-    } catch (e2) { setErr(e2?.message || 'Erreur réseau'); setSaving(false) }
+    } catch (e2) {
+      setErr(e2?.message || 'Erreur réseau')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
