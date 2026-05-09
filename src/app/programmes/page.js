@@ -217,14 +217,26 @@ function GenerateAIModal({ open, onClose, onGenerated }) {
   )
 }
 
-function ProgrammeCard({ programme }) {
+function ProgrammeCard({ programme, onDuplicate }) {
   const o = objectif(programme.objectif)
   const n = niveau(programme.niveau)
   const weekCount = programme._count?.weeks ?? 0
   const sessionCount = programme.sessionCount ?? 0
   const clientCount = programme._count?.clients ?? 0
+  const [duping, setDuping] = useState(false)
+
+  const handleDuplicate = async (e) => {
+    e.preventDefault(); e.stopPropagation()
+    setDuping(true)
+    try {
+      const res = await fetch(`/api/programme-builder/${programme.id}/duplicate`, { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.id) onDuplicate?.(data)
+    } finally { setDuping(false) }
+  }
+
   return (
-    <Card variant="interactive" padding="none">
+    <Card variant="interactive" padding="none" className="relative group">
       <Link href={`/programmes/${programme.id}`} className="block p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -243,6 +255,15 @@ function ProgrammeCard({ programme }) {
           {clientCount > 0 && <Badge variant="brand" size="xs">{clientCount} adhérent{clientCount > 1 ? 's' : ''}</Badge>}
         </div>
       </Link>
+      {/* Action duplicate — apparaît au hover */}
+      <button
+        onClick={handleDuplicate}
+        disabled={duping}
+        className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-surface-200/80 backdrop-blur text-[10px] font-medium text-surface-700 hover:text-brand-300 hover:bg-brand-500/15 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+        title="Dupliquer ce programme"
+      >
+        {duping ? '…' : '⎘ Dupliquer'}
+      </button>
     </Card>
   )
 }
@@ -319,7 +340,13 @@ export default function ProgrammesPage() {
       )}
       {!loading && !error && filtered.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(p => <ProgrammeCard key={p.id} programme={p} />)}
+          {filtered.map(p => (
+            <ProgrammeCard
+              key={p.id}
+              programme={p}
+              onDuplicate={(d) => { window.location.href = `/programmes/${d.id}` }}
+            />
+          ))}
         </div>
       )}
 

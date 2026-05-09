@@ -20,7 +20,7 @@ import { NextResponse } from 'next/server'
 
 const publicPages = ['/connexion', '/inscription', '/tarifs']
 
-const COACH_PAGE_PREFIXES = ['/clients', '/programmes', '/equipements', '/exercices-bibliotheque']
+const COACH_PAGE_PREFIXES = ['/clients', '/programmes', '/equipements', '/exercices-bibliotheque', '/seances-adherents']
 const COACH_API_PREFIXES = [
   '/api/clients',
   '/api/programmes',
@@ -123,6 +123,7 @@ export const config = {
     '/programmes/:path*',
     '/equipements/:path*',
     '/exercices-bibliotheque/:path*',
+    '/seances-adherents/:path*',
     '/adherent/:path*',
     '/change-password',
     '/api/clients/:path*',

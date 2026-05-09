@@ -425,6 +425,11 @@ export default function ProgrammeBuilderPage() {
     if (res.ok) router.push('/programmes')
     else alert(data.error)
   }
+  const duplicateProgramme = async () => {
+    const res = await fetch(`/api/programme-builder/${id}/duplicate`, { method: 'POST' })
+    const data = await res.json()
+    if (res.ok && data.id) router.push(`/programmes/${data.id}`)
+  }
 
   if (loading) return <LoadingState label="Chargement du programme…" />
   if (error)   return <ErrorState description={error} onRetry={load} />
@@ -443,6 +448,7 @@ export default function ProgrammeBuilderPage() {
         action={(
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={() => router.push('/programmes')}>← Programmes</Button>
+            <Button variant="secondary" onClick={duplicateProgramme}>⎘ Dupliquer</Button>
             <Button variant="danger" onClick={deleteProgramme}>Supprimer</Button>
           </div>
         )}

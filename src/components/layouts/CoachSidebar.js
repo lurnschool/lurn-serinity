@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react'
 import {
   IconDashboard, IconUsers, IconProgrammes, IconDumbbell, IconCalendar,
   IconBilling, IconSettings, IconLogout, IconMenu, IconClose, IconLibrary,
+  IconFlame,
 } from './icons'
 import Avatar from '../ui/Avatar'
 import IconButton from '../ui/IconButton'
@@ -17,8 +18,9 @@ const NAV_GROUPS = [
   {
     label: 'Pilotage',
     items: [
-      { name: 'Tableau de bord', href: '/',           Icon: IconDashboard },
-      { name: 'Agenda',          href: '/agenda',     Icon: IconCalendar },
+      { name: 'Tableau de bord', href: '/',                   Icon: IconDashboard },
+      { name: 'Séances live',    href: '/seances-adherents',  Icon: IconFlame },
+      { name: 'Agenda',          href: '/agenda',             Icon: IconCalendar },
     ],
   },
   {
