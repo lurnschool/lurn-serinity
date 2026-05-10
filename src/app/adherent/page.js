@@ -7,6 +7,21 @@ import {
   Card, Badge, Button, EmptyState, LoadingState, ErrorState, ProgressBar,
 } from '@/components/ui'
 import { IconFlame, IconChevron } from '@/components/layouts/icons'
+import MuscleHero from '@/components/exercises/MuscleHero'
+
+const OBJ_LABEL = {
+  remise_forme: 'Remise en forme',
+  perte_poids:  'Perte de poids',
+  prise_masse:  'Prise de masse',
+  endurance:    'Endurance',
+  force:        'Force',
+  souplesse:    'Souplesse',
+}
+const NIV_LABEL = {
+  debutant:      'Débutant',
+  intermediaire: 'Intermédiaire',
+  avance:        'Avancé',
+}
 
 function fmtDate(d) {
   if (!d) return ''
@@ -19,21 +34,25 @@ export default function AdherentHomePage() {
   const { data: session } = useSession()
   const [data, setData] = useState(null)
   const [recent, setRecent] = useState([])
+  const [catalog, setCatalog] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const load = async () => {
     setLoading(true); setError('')
     try {
-      const [progRes, logsRes] = await Promise.all([
+      const [progRes, logsRes, catRes] = await Promise.all([
         fetch('/api/adherent/programme-actif'),
         fetch('/api/adherent/workout-logs?limit=5'),
+        fetch('/api/adherent/programmes-disponibles'),
       ])
-      const progData = await progRes.json()
-      const logsData = await logsRes.json()
-      if (!progRes.ok) throw new Error(progData.error || 'Erreur')
+      const progData = await progRes.json().catch(() => ({}))
+      const logsData = await logsRes.json().catch(() => ({}))
+      const catData  = await catRes.json().catch(() => ({}))
+      if (!progRes.ok) throw new Error(progData?.error || 'Erreur')
       setData(progData)
-      setRecent(logsData.items || [])
+      setRecent(logsData?.items || [])
+      setCatalog(catData?.items || [])
     } catch (e) { setError(e?.message || 'Erreur réseau') }
     finally { setLoading(false) }
   }
@@ -47,35 +66,91 @@ export default function AdherentHomePage() {
   const greeting = heure < 5 ? 'Bonne nuit' : heure < 12 ? 'Bonjour' : heure < 18 ? 'Bon après-midi' : 'Bonsoir'
 
   if (!data?.programme) {
+    const featured = catalog.slice(0, 4)
     return (
       <div className="space-y-6">
         <div>
           <p className="ui-section-label text-brand-300 mb-1">{greeting},</p>
           <h1 className="text-title text-surface-950">{firstName}</h1>
+          <p className="text-sm text-surface-600 mt-1">
+            Choisis comment tu commences : un programme du catalogue ou une génération IA personnalisée.
+          </p>
         </div>
 
-        {/* CTA premium IA */}
-        <Card padding="md" className="bg-gradient-to-br from-brand-500/15 to-brand-700/5 border-brand-500/30">
-          <p className="ui-section-label text-brand-300">Créer mon programme</p>
-          <h2 className="text-title text-surface-950 mt-1">Génération IA personnalisée</h2>
-          <p className="text-sm text-surface-700 mt-2">
-            Réponds à 5 questions et l&apos;IA construit un programme calibré sur ton objectif,
-            ton matériel et ton niveau. Validation coach en option.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Link href="/adherent/programme-ia" className="flex-1">
-              <Button variant="primary" size="lg" className="w-full justify-center"
-                leftIcon={<IconFlame className="w-4 h-4" />}>
-                Générer mon programme
-              </Button>
-            </Link>
-            <Link href="/adherent/decouvrir" className="flex-1">
-              <Button variant="secondary" size="lg" className="w-full justify-center">
-                Catalogue
-              </Button>
-            </Link>
+        {/* Hero CTA — bibliothèque + IA en duo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link href="/adherent/decouvrir" className="block group">
+            <Card variant="interactive" padding="none" className="overflow-hidden h-full">
+              <div className="relative h-32">
+                <MuscleHero objectif="prise_masse" muscleGroup="FULL_BODY" showOverlay={false} className="absolute inset-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                <div className="relative h-full p-4 flex flex-col justify-end text-white">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold opacity-90">Bibliothèque</p>
+                  <p className="text-base font-bold leading-tight">{catalog.length || ''} programme{catalog.length > 1 ? 's' : ''} pré-construits</p>
+                </div>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <p className="text-xs text-surface-600">Choisis et démarre en un tap.</p>
+                <IconChevron className="w-4 h-4 text-brand-300" />
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/adherent/programme-ia" className="block group">
+            <Card variant="interactive" padding="none" className="overflow-hidden h-full bg-gradient-to-br from-brand-500/15 to-brand-700/5 border-brand-500/30">
+              <div className="relative h-32">
+                <MuscleHero objectif="force" muscleGroup="JAMBES" showOverlay={false} className="absolute inset-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/40 to-transparent" />
+                <div className="relative h-full p-4 flex flex-col justify-end text-white">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold opacity-90">Sur mesure</p>
+                  <p className="text-base font-bold leading-tight">Génération IA personnalisée</p>
+                </div>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <p className="text-xs text-surface-600">5 questions, programme calibré.</p>
+                <IconChevron className="w-4 h-4 text-brand-300" />
+              </div>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Catalogue vedette */}
+        {featured.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="ui-section-label text-surface-500">Programmes vedettes</p>
+              <Link href="/adherent/decouvrir" className="text-xs text-brand-300 hover:text-brand-200">Voir tout →</Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {featured.map(p => {
+                const muscle = p.objectif === 'force' ? 'JAMBES'
+                            : p.objectif === 'prise_masse' ? 'PECTORAUX'
+                            : p.objectif === 'endurance' || p.objectif === 'perte_poids' ? 'CARDIO'
+                            : p.objectif === 'souplesse' ? 'DOS' : 'FULL_BODY'
+                return (
+                  <Link key={p.id} href="/adherent/decouvrir" className="block">
+                    <Card variant="interactive" padding="none" className="overflow-hidden">
+                      <div className="relative h-28">
+                        <MuscleHero objectif={p.objectif} muscleGroup={muscle} showOverlay={false} className="absolute inset-0" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                        <div className="relative h-full p-3 flex flex-col justify-end text-white">
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            <Badge variant="brand" size="xs">{OBJ_LABEL[p.objectif] || p.objectif}</Badge>
+                            <Badge variant="neutral" size="xs">{NIV_LABEL[p.niveau] || p.niveau}</Badge>
+                          </div>
+                          <p className="text-xs font-semibold leading-tight line-clamp-1">{p.nom}</p>
+                          <p className="text-[10px] opacity-80">
+                            {p.duree} sem · {p.sessionCount} séance{p.sessionCount > 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-        </Card>
+        )}
 
         <EmptyState
           variant="card"

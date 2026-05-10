@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && prisma generate && next build",
+    "build": "prisma migrate deploy && prisma generate && node prisma/seed-exercise-library.js && node prisma/seed-templates.js && next build",
     "start": "next start",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:status": "prisma migrate status",

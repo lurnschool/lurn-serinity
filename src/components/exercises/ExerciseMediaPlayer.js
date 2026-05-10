@@ -22,7 +22,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import MuscleSilhouette, { muscleLabelFr } from './MuscleSilhouette'
+import { muscleLabelFr } from './MuscleSilhouette'
+import MuscleHero from './MuscleHero'
 
 const SIZES = {
   sm: { container: 'w-20 h-20',   silhouette: 'sm', radius: 'rounded-xl',  text: 'text-[10px]' },
@@ -126,7 +127,7 @@ export default function ExerciseMediaPlayer({
           )}
         </>
       ) : (
-        <FallbackPremium muscleGroup={primaryMuscleGroup} silhouetteSize={cfg.silhouette} />
+        <FallbackPremium muscleGroup={primaryMuscleGroup} />
       )}
 
       {/* Overlay infos */}
@@ -161,14 +162,9 @@ export default function ExerciseMediaPlayer({
   )
 }
 
-function FallbackPremium({ muscleGroup, silhouetteSize }) {
+function FallbackPremium({ muscleGroup }) {
+  // Photo réelle Unsplash adaptée au groupe musculaire (licence commerciale).
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-50">
-      <MuscleSilhouette
-        muscleGroup={muscleGroup}
-        size={silhouetteSize}
-        variant="light"
-      />
-    </div>
+    <MuscleHero muscleGroup={muscleGroup} showOverlay={false} className="absolute inset-0" />
   )
 }
