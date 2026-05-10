@@ -1,0 +1,43 @@
+{
+  "name": "City Coaching",
+  "short_name": "City Coaching",
+  "description": "Programmes premium et suivi personnalisé pour votre salle de sport.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0d",
+  "theme_color": "#22c55e",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/logo-city-coaching.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-city-coaching.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Séance du jour",
+      "short_name": "Séance",
+      "description": "Démarre ta séance du jour",
+      "url": "/adherent",
+      "icons": [{ "src": "/logo-city-coaching.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Progression",
+      "short_name": "Progression",
+      "url": "/adherent/progression",
+      "icons": [{ "src": "/logo-city-coaching.png", "sizes": "192x192" }]
+    }
+  ]
+}

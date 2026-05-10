@@ -56,8 +56,15 @@ export default function AdherentHomePage() {
         <EmptyState
           variant="card"
           title="Aucun programme actif"
-          description="Demande à ton coach d'activer un programme pour toi. Il apparaîtra ici dès qu'il sera prêt."
+          description="Demande à ton coach d'activer un programme pour toi, ou choisis-en un dans le catalogue pour démarrer en autonomie."
           icon={<IconFlame className="w-7 h-7" />}
+          action={(
+            <Link href="/adherent/decouvrir">
+              <Button variant="primary" size="lg">
+                Choisir mon programme
+              </Button>
+            </Link>
+          )}
         />
       </div>
     )
