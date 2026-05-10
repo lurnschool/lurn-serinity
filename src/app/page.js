@@ -43,8 +43,17 @@ export default function CoachDashboardPage() {
     setLoading(true); setError('')
     try {
       const res = await fetch('/api/coach/cockpit')
-      const d = await res.json()
-      if (!res.ok) throw new Error(d.error || 'Erreur')
+      // Lit le body en texte d'abord, puis tente JSON. Permet d'afficher
+      // un message lisible si la réponse est vide (500 sans body).
+      const raw = await res.text()
+      let d = null
+      if (raw) {
+        try { d = JSON.parse(raw) } catch {
+          throw new Error(`Réponse non-JSON du serveur (HTTP ${res.status}).`)
+        }
+      }
+      if (!res.ok) throw new Error(d?.error || `Erreur serveur (HTTP ${res.status})`)
+      if (!d) throw new Error('Réponse serveur vide.')
       setData(d)
     } catch (e) { setError(e?.message || 'Erreur réseau') }
     finally { setLoading(false) }
