@@ -10,10 +10,10 @@ import BrandLogo from '../BrandLogo'
 import { cn } from '../ui/utils'
 
 const TABS = [
-  { name: 'Accueil',     href: '/adherent',             Icon: IconHome,  match: (p) => p === '/adherent' },
-  { name: 'Séance',      href: '/adherent/seance',      Icon: IconFlame, match: (p) => p.startsWith('/adherent/seance') },
-  { name: 'Progression', href: '/adherent/progression', Icon: IconChart, match: (p) => p.startsWith('/adherent/progression') },
-  { name: 'Profil',      href: '/adherent/profil',      Icon: IconUser,  match: (p) => p.startsWith('/adherent/profil') },
+  { name: 'Accueil',     href: '/adherent',             Icon: IconHome,  accent: 'text-brand-300',  bar: 'bg-brand-400',  match: (p) => p === '/adherent' },
+  { name: 'Séance',      href: '/adherent/seance',      Icon: IconFlame, accent: 'text-accent-300', bar: 'bg-accent-400', match: (p) => p.startsWith('/adherent/seance') },
+  { name: 'Progression', href: '/adherent/progression', Icon: IconChart, accent: 'text-plum-300',   bar: 'bg-plum-400',   match: (p) => p.startsWith('/adherent/progression') },
+  { name: 'Profil',      href: '/adherent/profil',      Icon: IconUser,  accent: 'text-ocean-300',  bar: 'bg-ocean-400',  match: (p) => p.startsWith('/adherent/profil') },
 ]
 
 function AdherentHeader({ name }) {
@@ -42,7 +42,7 @@ function AdherentHeader({ name }) {
 function BottomNav({ pathname }) {
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-30 bg-surface-50/95 backdrop-blur-xl border-t border-surface-200"
+      className="fixed bottom-0 inset-x-0 z-30 glass border-t border-white/10"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="max-w-mobile mx-auto h-bottomnav-h grid grid-cols-4">
@@ -53,12 +53,12 @@ function BottomNav({ pathname }) {
               key={tab.href}
               href={tab.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 tap-target relative',
-                active ? 'text-brand-300' : 'text-surface-500 hover:text-surface-800',
+                'flex flex-col items-center justify-center gap-1 tap-target relative transition-colors',
+                active ? tab.accent : 'text-surface-500 hover:text-surface-800',
               )}
             >
               {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full bg-brand-400" />
+                <span className={cn('absolute top-0 left-1/2 -translate-x-1/2 w-10 h-1 rounded-b-full', tab.bar)} />
               )}
               <tab.Icon className="w-5 h-5" />
               <span className="text-[10px] font-semibold tracking-tight">{tab.name}</span>

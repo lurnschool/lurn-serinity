@@ -215,6 +215,96 @@ input, select, textarea {
   .stat-value            { @apply ui-stat-value; }
   .stat-label            { @apply ui-stat-label; }
   .section-label         { @apply ui-section-label; }
+
+  /* === Premium — Sprint 4.2 — design riche multi-accents ===========*/
+
+  /* Glassmorphism card — surface translucide + blur */
+  .glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Aurora background animé — utilisé sur les hero majeurs */
+  .aurora-bg {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .aurora-bg::before,
+  .aurora-bg::after {
+    content: '';
+    position: absolute;
+    inset: -40%;
+    border-radius: 9999px;
+    filter: blur(80px);
+    opacity: 0.55;
+    z-index: -1;
+    will-change: transform;
+  }
+  .aurora-bg::before {
+    background: radial-gradient(circle, #f97316 0%, transparent 60%);
+    animation: aurora 14s ease-in-out infinite;
+    top: -30%; left: -20%;
+  }
+  .aurora-bg::after {
+    background: radial-gradient(circle, #a855f7 0%, transparent 60%);
+    animation: aurora 18s ease-in-out infinite reverse;
+    bottom: -30%; right: -20%;
+  }
+
+  /* Aurora variantes par focus / objectif */
+  .aurora-flame::before { background: radial-gradient(circle, #f97316 0%, transparent 60%); }
+  .aurora-flame::after  { background: radial-gradient(circle, #ef4444 0%, transparent 60%); }
+  .aurora-ocean::before { background: radial-gradient(circle, #06b6d4 0%, transparent 60%); }
+  .aurora-ocean::after  { background: radial-gradient(circle, #6366f1 0%, transparent 60%); }
+  .aurora-mint::before  { background: radial-gradient(circle, #22c55e 0%, transparent 60%); }
+  .aurora-mint::after   { background: radial-gradient(circle, #06b6d4 0%, transparent 60%); }
+  .aurora-purple::before { background: radial-gradient(circle, #a855f7 0%, transparent 60%); }
+  .aurora-purple::after  { background: radial-gradient(circle, #ec4899 0%, transparent 60%); }
+  .aurora-gold::before  { background: radial-gradient(circle, #fbbf24 0%, transparent 60%); }
+  .aurora-gold::after   { background: radial-gradient(circle, #f97316 0%, transparent 60%); }
+
+  /* Stats colorées — variantes */
+  .stat-flame  { @apply text-accent-400; text-shadow: 0 0 24px rgba(249,115,22,0.5); }
+  .stat-violet { @apply text-plum-400;   text-shadow: 0 0 24px rgba(168,85,247,0.5); }
+  .stat-ocean  { @apply text-ocean-400;  text-shadow: 0 0 24px rgba(6,182,212,0.5); }
+  .stat-rose   { @apply text-rose-400;   text-shadow: 0 0 24px rgba(244,63,94,0.5); }
+  .stat-mint   { @apply text-brand-300;  text-shadow: 0 0 24px rgba(34,197,94,0.5); }
+
+  /* Card "premium" — gradient mesh subtil + bord glow */
+  .card-premium {
+    @apply rounded-2xl border;
+    background:
+      radial-gradient(ellipse at top left, rgba(34,197,94,0.05), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(168,85,247,0.05), transparent 50%),
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border-color: rgba(255,255,255,0.07);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  /* Outlined cell — fond noir + grand chiffre coloré */
+  .stat-cell {
+    @apply rounded-2xl p-4 relative overflow-hidden;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* Animations utilisées */
+  .anim-shimmer {
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s linear infinite;
+  }
+}
+
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, -30px) scale(1.08); }
+  66%      { transform: translate(-30px, 40px) scale(0.94); }
 }
 
 @keyframes shimmer {

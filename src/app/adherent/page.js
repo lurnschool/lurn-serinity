@@ -23,6 +23,85 @@ const NIV_LABEL = {
   avance:        'Avancé',
 }
 
+// Map focus de séance → palette dominante (couleurs riches, pas mono vert).
+function sessionTone(focus = '') {
+  const f = String(focus).toLowerCase()
+  if (f.includes('push') || f.includes('pec') || f.includes('épaule') || f.includes('bench'))
+    return {
+      gradient: 'bg-gradient-to-br from-accent-600 via-rose-600 to-plum-700',
+      aurora:   'aurora-flame',
+      border:   'border-accent-500/40',
+      label:    'text-accent-200',
+      dot:      'bg-accent-300',
+      glow:     'shadow-glow-orange',
+    }
+  if (f.includes('pull') || f.includes('dos') || f.includes('biceps') || f.includes('lat'))
+    return {
+      gradient: 'bg-gradient-to-br from-plum-600 via-fuchsia-600 to-rose-600',
+      aurora:   'aurora-purple',
+      border:   'border-plum-500/40',
+      label:    'text-plum-200',
+      dot:      'bg-plum-300',
+      glow:     'shadow-glow-violet',
+    }
+  if (f.includes('jamb') || f.includes('leg') || f.includes('squat') || f.includes('quad') || f.includes('fess'))
+    return {
+      gradient: 'bg-gradient-to-br from-brand-600 via-emerald-600 to-ocean-600',
+      aurora:   'aurora-mint',
+      border:   'border-brand-500/40',
+      label:    'text-brand-200',
+      dot:      'bg-brand-300',
+      glow:     'shadow-glow-brand',
+    }
+  if (f.includes('cardio') || f.includes('hiit') || f.includes('endurance') || f.includes('liss'))
+    return {
+      gradient: 'bg-gradient-to-br from-ocean-600 via-blue-600 to-indigo-700',
+      aurora:   'aurora-ocean',
+      border:   'border-ocean-500/40',
+      label:    'text-ocean-200',
+      dot:      'bg-ocean-300',
+      glow:     'shadow-glow-ocean',
+    }
+  if (f.includes('mobi') || f.includes('soup') || f.includes('stretch') || f.includes('yoga'))
+    return {
+      gradient: 'bg-gradient-to-br from-teal-600 via-ocean-600 to-emerald-600',
+      aurora:   'aurora-mint',
+      border:   'border-teal-500/40',
+      label:    'text-teal-200',
+      dot:      'bg-teal-300',
+      glow:     'shadow-glow-ocean',
+    }
+  // Full body / défaut
+  return {
+    gradient: 'bg-gradient-to-br from-brand-600 via-ocean-600 to-plum-700',
+    aurora:   'aurora-bg',
+    border:   'border-brand-500/40',
+    label:    'text-brand-200',
+    dot:      'bg-brand-300',
+    glow:     'shadow-glow-brand',
+  }
+}
+
+// Stat colorée premium — gros chiffre avec glow.
+function StatCellPremium({ tone, value, suffix = '', label }) {
+  const valueClass = {
+    flame:  'stat-flame',
+    violet: 'stat-violet',
+    ocean:  'stat-ocean',
+    rose:   'stat-rose',
+    mint:   'stat-mint',
+  }[tone] || 'stat-mint'
+  return (
+    <div className="stat-cell">
+      <p className={`text-3xl font-bold tabular-nums ${valueClass}`}>
+        {value}
+        {suffix && <span className="text-base ml-0.5 opacity-70">{suffix}</span>}
+      </p>
+      <p className="text-[10px] uppercase tracking-wider text-surface-500 font-semibold mt-1">{label}</p>
+    </div>
+  )
+}
+
 function fmtDate(d) {
   if (!d) return ''
   try {
@@ -177,73 +256,99 @@ export default function AdherentHomePage() {
   const progressPct = totalIdx > 0 ? Math.round((positionIdx / totalIdx) * 100) : 0
   const exerciseCount = currentSession?.sessionExercises?.length || 0
 
+  // Détermine la couleur dominante de la séance selon son focus
+  const focusTone = sessionTone(currentSession?.focus)
+
   return (
     <div className="space-y-6">
-      <div>
-        <p className="ui-section-label text-brand-300 mb-1">{greeting},</p>
-        <h1 className="text-title text-surface-950">{firstName}</h1>
+      {/* HERO premium — gradient + photo + nom */}
+      <div className={`relative overflow-hidden rounded-3xl aurora-bg ${focusTone.aurora} -mx-1 px-5 pt-6 pb-7`}>
+        <div className="relative z-10">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-white/70 font-semibold">{greeting}</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight mt-1">{firstName}</h1>
+          <p className="text-sm text-white/80 mt-1.5">
+            {recent.length > 0
+              ? `${recent.filter(r => r.status === 'COMPLETED').length} séance${recent.filter(r => r.status === 'COMPLETED').length > 1 ? 's' : ''} cette semaine — continue.`
+              : `Première séance ? On va te poser les bases.`}
+          </p>
+        </div>
       </div>
 
-      {/* Carte séance du jour */}
+      {/* Stats colorées */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <StatCellPremium tone="mint"  value={recent.filter(r => r.status === 'COMPLETED').length} label="Séances" />
+        <StatCellPremium tone="flame" value={programme.nom.length > 0 ? assignment.currentWeek : 0} label={`/ ${totalWeeks} sem`} />
+        <StatCellPremium tone="violet" value={`${progressPct}`} suffix="%" label="Progression" />
+      </div>
+
+      {/* Carte séance du jour — couleur dominante du focus */}
       {currentSession ? (
-        <Card padding="md" className="bg-gradient-to-br from-brand-500/10 to-surface-100 border-brand-500/30">
-          <div className="flex items-center justify-between mb-2">
-            <p className="ui-section-label text-brand-300">Séance du jour</p>
-            <Badge variant="brand" size="sm">Sem {assignment.currentWeek}</Badge>
-          </div>
-          <h2 className="text-title text-surface-950 mb-1">{currentSession.title}</h2>
-          {currentSession.focus && (
-            <p className="text-sm text-surface-700 mb-3">{currentSession.focus}</p>
-          )}
-          <div className="flex items-center gap-3 text-xs text-surface-600 mb-4">
-            <span>⏱ {currentSession.estimatedDurationMinutes} min</span>
-            <span>·</span>
-            <span>{exerciseCount} exercice{exerciseCount > 1 ? 's' : ''}</span>
-          </div>
-          {currentSession.sessionExercises.length > 0 && (
-            <div className="space-y-1.5 mb-4">
-              {currentSession.sessionExercises.slice(0, 4).map(ex => (
-                <div key={ex.id} className="flex items-center gap-2 text-xs text-surface-700">
-                  <span className="w-5 h-5 rounded bg-brand-500/15 text-brand-300 text-[10px] font-bold flex items-center justify-center shrink-0">{ex.order}</span>
-                  <span className="font-medium truncate">{ex.exerciseLibrary?.name || 'Exercice'}</span>
-                  <span className="text-surface-500 ml-auto tabular-nums shrink-0">
-                    {ex.sets}× {ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}-${ex.repsMax}`}
-                  </span>
-                </div>
-              ))}
-              {currentSession.sessionExercises.length > 4 && (
-                <p className="text-[11px] text-surface-500 pl-7">+ {currentSession.sessionExercises.length - 4} autres exercices</p>
-              )}
+        <div className={`relative overflow-hidden rounded-3xl border ${focusTone.border} ${focusTone.gradient}`}>
+          <div className="relative p-5 z-10">
+            <div className="flex items-center justify-between mb-3">
+              <span className={`inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] font-bold ${focusTone.label}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${focusTone.dot} animate-pulse-soft`} />
+                Séance du jour
+              </span>
+              <span className={`text-[10px] uppercase tracking-wider font-bold ${focusTone.label} bg-white/10 px-2 py-0.5 rounded-full backdrop-blur-md`}>Sem {assignment.currentWeek}</span>
             </div>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <Link href={`/adherent/seance/focus?sessionId=${currentSession.id}`}>
-              <Button variant="primary" size="lg" className="w-full justify-center shadow-glow-brand"
-                leftIcon={<IconFlame className="w-4 h-4" />}>
-                Mode focus
-              </Button>
-            </Link>
-            <Link href={`/adherent/seance?sessionId=${currentSession.id}`}>
-              <Button variant="secondary" size="lg" className="w-full justify-center"
-                rightIcon={<IconChevron className="w-4 h-4" />}>
-                Mode liste
-              </Button>
-            </Link>
+            <h2 className="text-2xl font-bold text-white tracking-tight leading-tight">{currentSession.title}</h2>
+            {currentSession.focus && (
+              <p className={`text-sm font-medium mt-1 ${focusTone.label}`}>{currentSession.focus}</p>
+            )}
+            <div className="flex items-center gap-3 text-xs text-white/80 mt-3 mb-4">
+              <span className="font-semibold">{currentSession.estimatedDurationMinutes} min</span>
+              <span className="text-white/40">•</span>
+              <span>{exerciseCount} exercice{exerciseCount > 1 ? 's' : ''}</span>
+            </div>
+            {currentSession.sessionExercises.length > 0 && (
+              <div className="space-y-1.5 mb-4 bg-black/30 backdrop-blur-md rounded-2xl p-3 border border-white/10">
+                {currentSession.sessionExercises.slice(0, 4).map(ex => (
+                  <div key={ex.id} className="flex items-center gap-2 text-xs text-white/85">
+                    <span className={`w-5 h-5 rounded-md bg-white/15 ${focusTone.label} text-[10px] font-bold flex items-center justify-center shrink-0`}>{ex.order}</span>
+                    <span className="font-medium truncate flex-1">{ex.exerciseLibrary?.name || 'Exercice'}</span>
+                    <span className="text-white/60 tabular-nums shrink-0">
+                      {ex.sets}× {ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}-${ex.repsMax}`}
+                    </span>
+                  </div>
+                ))}
+                {currentSession.sessionExercises.length > 4 && (
+                  <p className="text-[11px] text-white/60 pl-7">+ {currentSession.sessionExercises.length - 4} autres</p>
+                )}
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Link href={`/adherent/seance/focus?sessionId=${currentSession.id}`}>
+                <Button variant="primary" size="lg" className={`w-full justify-center ${focusTone.glow}`}
+                  leftIcon={<IconFlame className="w-4 h-4" />}>
+                  Mode focus
+                </Button>
+              </Link>
+              <Link href={`/adherent/seance?sessionId=${currentSession.id}`}>
+                <Button variant="secondary" size="lg" className="w-full justify-center backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/15"
+                  rightIcon={<IconChevron className="w-4 h-4" />}>
+                  Mode liste
+                </Button>
+              </Link>
+            </div>
           </div>
-        </Card>
+        </div>
       ) : (
-        <Card padding="md">
-          <p className="text-sm text-surface-600">Tu as terminé toutes les séances de ce programme. Bravo 👏</p>
+        <Card padding="md" className="card-premium">
+          <p className="text-sm text-surface-600">Tu as terminé toutes les séances de ce programme. Bravo, on enchaîne ?</p>
         </Card>
       )}
 
       {/* Progression programme */}
-      <Card padding="md">
+      <Card padding="md" className="card-premium">
         <div className="flex items-center justify-between mb-2">
-          <p className="ui-section-label text-surface-500">Progression {programme.nom}</p>
-          <span className="text-xs text-surface-700 tabular-nums">{positionIdx} / {totalIdx}</span>
+          <p className="ui-section-label text-surface-500">Programme — {programme.nom}</p>
+          <span className="text-xs text-surface-700 tabular-nums font-bold">{positionIdx} / {totalIdx}</span>
         </div>
-        <ProgressBar value={progressPct} size="md" />
+        <div className="h-2 rounded-full bg-surface-200 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-accent-500 via-rose-500 to-plum-500 transition-all duration-500"
+            style={{ width: `${progressPct}%` }} />
+        </div>
         <p className="text-xs text-surface-500 mt-2">
           {totalWeeks} semaines · {totalSessions} séances au total
         </p>
