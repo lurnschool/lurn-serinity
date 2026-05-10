@@ -9,13 +9,21 @@ import {
 import ExerciseMediaCard from '@/components/ExerciseMediaCard'
 import {
   MUSCLE_GROUPS, LEVELS, GOAL_TAGS, EQUIPMENT_PRESETS,
+  MEDIA_STATUSES, MEDIA_TYPES,
   muscleLabel, levelLabel, levelVariant, goalLabel, goalVariant,
+  mediaStatusLabel, mediaStatusVariant,
 } from '@/lib/exercise-library'
+import ExerciseMediaPlayer from '@/components/exercises/ExerciseMediaPlayer'
 import { IconPlus, IconSearch, IconClose } from '@/components/layouts/icons'
 
 function ExerciseCard({ exercise, onOpen, onArchive, onRestore }) {
   return (
     <Card variant="interactive" padding="none" onClick={() => onOpen(exercise)}>
+      {/* Vignette média (player premium ou fallback silhouette) */}
+      <div className="aspect-video w-full overflow-hidden">
+        <ExerciseMediaPlayer exercise={exercise} size="lg" showOverlay={false} />
+      </div>
+
       <div className="p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -23,6 +31,11 @@ function ExerciseCard({ exercise, onOpen, onArchive, onRestore }) {
             <p className="text-[11px] text-surface-500 mt-0.5 font-mono truncate">{exercise.slug}</p>
           </div>
           {!exercise.isActive && <Badge variant="neutral" size="xs">archivé</Badge>}
+          {exercise.isActive && exercise.mediaStatus && exercise.mediaStatus !== 'approved' && (
+            <Badge variant={mediaStatusVariant(exercise.mediaStatus)} size="xs">
+              {mediaStatusLabel(exercise.mediaStatus)}
+            </Badge>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-1.5">
@@ -186,6 +199,13 @@ const EMPTY_FORM = {
   commonMistakes: [],
   contraindications: [],
   mediaUrl: '',
+  mediaType: 'none',
+  thumbnailUrl: '',
+  videoProvider: '',
+  mediaSource: '',
+  mediaLicense: '',
+  mediaAttribution: '',
+  mediaStatus: 'pending',
 }
 
 function ExerciseFormModal({ open, exercise, onClose, onSaved }) {
@@ -296,18 +316,69 @@ function ExerciseFormModal({ open, exercise, onClose, onSaved }) {
             placeholder="Ex: Lombalgie aiguë" />
         </FormField>
 
-        <FormField label="URL média (image/GIF/vidéo MP4/YouTube)" hint="Optionnel. Affiché dans la fiche exercice et la séance.">
-          <Input
-            value={form.mediaUrl || ''}
-            onChange={e => set('mediaUrl', e.target.value)}
-            placeholder="https://… (jpg, gif, mp4, youtube.com/watch?v=…)"
-          />
-          {form.mediaUrl && (
-            <div className="mt-2">
-              <ExerciseMediaCard exercise={form} size="md" />
+        <fieldset className="space-y-3 border-t border-surface-200 pt-4">
+          <legend className="ui-section-label text-brand-300">Média</legend>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormField label="Type de média">
+              <Select value={form.mediaType || 'none'} onChange={e => set('mediaType', e.target.value)}>
+                {MEDIA_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </Select>
+            </FormField>
+            <FormField label="Statut">
+              <Select value={form.mediaStatus || 'pending'} onChange={e => set('mediaStatus', e.target.value)}>
+                {MEDIA_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </Select>
+            </FormField>
+          </div>
+
+          <FormField label="URL média principal" hint="image, GIF, MP4, YouTube. Vide = fallback silhouette premium.">
+            <Input
+              value={form.mediaUrl || ''}
+              onChange={e => set('mediaUrl', e.target.value)}
+              placeholder="https://… (jpg, gif, mp4, youtube.com/watch?v=…)"
+            />
+          </FormField>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormField label="URL miniature (optionnel)">
+              <Input
+                value={form.thumbnailUrl || ''}
+                onChange={e => set('thumbnailUrl', e.target.value)}
+                placeholder="https://…"
+              />
+            </FormField>
+            <FormField label="Source" hint="ex: maison, wger, mixamo">
+              <Input
+                value={form.mediaSource || ''}
+                onChange={e => set('mediaSource', e.target.value)}
+              />
+            </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormField label="Licence" hint="ex: proprietary, CC-BY-SA-4.0, mixamo-adobe">
+              <Input
+                value={form.mediaLicense || ''}
+                onChange={e => set('mediaLicense', e.target.value)}
+              />
+            </FormField>
+            <FormField label="Attribution affichée">
+              <Input
+                value={form.mediaAttribution || ''}
+                onChange={e => set('mediaAttribution', e.target.value)}
+                placeholder="Source: Wger.de"
+              />
+            </FormField>
+          </div>
+
+          {/* Preview live */}
+          <div className="rounded-2xl overflow-hidden bg-surface-100 max-w-sm">
+            <div className="aspect-video">
+              <ExerciseMediaPlayer exercise={form} size="lg" showOverlay />
             </div>
-          )}
-        </FormField>
+          </div>
+        </fieldset>
       </form>
     </Modal>
   )
@@ -335,8 +406,12 @@ function ExerciseDetailDrawer({ exercise, onClose, onEdit, onArchive, onRestore 
       )}
     >
       <div className="space-y-5">
-        {/* Media en haut */}
-        <ExerciseMediaCard exercise={exercise} size="lg" />
+        {/* Media en haut — player premium */}
+        <div className="rounded-2xl overflow-hidden">
+          <div className="aspect-video">
+            <ExerciseMediaPlayer exercise={exercise} size="lg" showOverlay />
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-1.5">
           <Badge variant={levelVariant(exercise.level)}>{levelLabel(exercise.level)}</Badge>
@@ -348,6 +423,11 @@ function ExerciseDetailDrawer({ exercise, onClose, onEdit, onArchive, onRestore 
             <Badge key={g} variant={goalVariant(g)} size="xs">{goalLabel(g)}</Badge>
           ))}
           {!exercise.isActive && <Badge variant="warning" size="xs">archivé</Badge>}
+          {exercise.mediaStatus && (
+            <Badge variant={mediaStatusVariant(exercise.mediaStatus)} size="xs">
+              Média : {mediaStatusLabel(exercise.mediaStatus)}
+            </Badge>
+          )}
         </div>
 
         {exercise.description && (
@@ -412,6 +492,7 @@ export default function ExerciseLibraryPage() {
   const [muscleFilter, setMuscleFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('')
   const [goalFilter, setGoalFilter] = useState('')
+  const [mediaStatusFilter, setMediaStatusFilter] = useState('')
   const [includeArchived, setIncludeArchived] = useState(false)
 
   const [showForm, setShowForm] = useState(false)
@@ -426,6 +507,7 @@ export default function ExerciseLibraryPage() {
       if (muscleFilter) params.set('muscle', muscleFilter)
       if (levelFilter) params.set('level', levelFilter)
       if (goalFilter) params.set('goal', goalFilter)
+      if (mediaStatusFilter) params.set('mediaStatus', mediaStatusFilter)
       if (includeArchived) params.set('includeArchived', '1')
       const res = await fetch(`/api/exercise-library?${params}`)
       const data = await res.json()
@@ -438,7 +520,7 @@ export default function ExerciseLibraryPage() {
     } finally {
       setLoading(false)
     }
-  }, [q, muscleFilter, levelFilter, goalFilter, includeArchived])
+  }, [q, muscleFilter, levelFilter, goalFilter, mediaStatusFilter, includeArchived])
 
   // Debounced reload sur changement de filtre
   useEffect(() => {
@@ -464,6 +546,7 @@ export default function ExerciseLibraryPage() {
     muscleFilter && { k: 'muscle', label: muscleLabel(muscleFilter), reset: () => setMuscleFilter('') },
     levelFilter  && { k: 'level',  label: levelLabel(levelFilter),  reset: () => setLevelFilter('')  },
     goalFilter   && { k: 'goal',   label: goalLabel(goalFilter),    reset: () => setGoalFilter('')   },
+    mediaStatusFilter && { k: 'media', label: `Média: ${mediaStatusLabel(mediaStatusFilter)}`, reset: () => setMediaStatusFilter('') },
     q            && { k: 'q',      label: `« ${q} »`,                reset: () => setQ('')            },
   ].filter(Boolean)
 
@@ -482,7 +565,7 @@ export default function ExerciseLibraryPage() {
 
       {/* Filtres */}
       <Card variant="flat" padding="md" className="mb-6 space-y-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
           <Input
             leftIcon={<IconSearch className="w-4 h-4" />}
             placeholder="Rechercher un exercice…"
@@ -500,6 +583,10 @@ export default function ExerciseLibraryPage() {
           <Select value={goalFilter} onChange={e => setGoalFilter(e.target.value)}>
             <option value="">Tous objectifs</option>
             {GOAL_TAGS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+          </Select>
+          <Select value={mediaStatusFilter} onChange={e => setMediaStatusFilter(e.target.value)}>
+            <option value="">Statut média</option>
+            {MEDIA_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </Select>
         </div>
 

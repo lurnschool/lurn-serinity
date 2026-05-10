@@ -33,9 +33,15 @@ export async function PATCH(req, { params }) {
   const v = validateExercisePayload(body, { requireName: false })
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 })
 
+  // Si le coach valide / rejette le média, on horodate la review.
+  const data = { ...v.data }
+  if (v.data.mediaStatus && (v.data.mediaStatus === 'approved' || v.data.mediaStatus === 'rejected')) {
+    data.lastMediaReviewAt = new Date()
+  }
+
   const updated = await prisma.exerciseLibrary.update({
     where: { id: params.id },
-    data: v.data,
+    data,
   }).catch(e => null)
 
   if (!updated) return NextResponse.json({ error: 'Exercice introuvable' }, { status: 404 })

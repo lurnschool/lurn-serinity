@@ -114,6 +114,14 @@ model Client {
   petitDejeuner      String  @default("")
   dernierBilanDate   DateTime?
 
+  // PR Premium Autonomous OS — préférences entraînement
+  preferredEquipment       String[] @default([])
+  preferredSessionMinutes  Int?
+  preferredFrequency       Int?
+  physicalRestrictions     String   @default("")
+  aiConsent                Boolean  @default(false)
+  aiConsentAt              DateTime?
+
   // Notes internes
   notesPrivees       String  @default("")
 
@@ -133,6 +141,7 @@ model Client {
   progressions  Progression[]
   mesures       Mesure[]
   workoutLogs   WorkoutLog[]
+  aiRequests    AiProgramRequest[]
 }
 
 // Suivi des mensurations dans le temps
@@ -245,6 +254,7 @@ model Programme {
   clients      ClientProgramme[]
   progressions Progression[]
   weeks        ProgrammeWeek[]         // PR 2C — structure premium
+  aiRequests   AiProgramRequest[]
 }
 
 model Exercice {
@@ -329,6 +339,25 @@ model ExerciseLibrary {
   commonMistakes         String[]  @default([])
   contraindications      String[]  @default([])
   mediaUrl               String?
+  /// PR Premium Autonomous OS — couche média complète.
+  /// Type principal : none | image | gif | mp4 | youtube | three_d
+  mediaType              String    @default("none")
+  thumbnailUrl           String?
+  /// youtube | cloudinary | self | wger
+  videoProvider          String?
+  /// wger | maison | mixamo | sketchfab | community
+  mediaSource            String?
+  /// CC-BY-SA-4.0 | proprietary | mixamo-adobe | …
+  mediaLicense           String?
+  /// Texte d'attribution affiché si la licence l'exige.
+  mediaAttribution       String?
+  /// pending | approved | rejected
+  mediaStatus            String    @default("pending")
+  muscleMapUrl           String?
+  animationUrl           String?
+  /// static | loop | full
+  demonstrationType      String    @default("static")
+  lastMediaReviewAt      DateTime?
   /// Soft-delete : false = archivé.
   isActive               Boolean   @default(true)
   archivedAt             DateTime?
@@ -341,6 +370,7 @@ model ExerciseLibrary {
   @@index([level])
   @@index([isActive])
   @@index([createdAt])
+  @@index([mediaStatus])
 }
 
 /// Une semaine d'un programme.
@@ -432,6 +462,10 @@ model WorkoutLog {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
+  /// PR Premium Autonomous OS — pré-rédaction IA du retour coach.
+  aiReviewDraft        String?
+  aiReviewGeneratedAt  DateTime?
+
   client            Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientProgramme   ClientProgramme?  @relation(fields: [clientProgrammeId], references: [id], onDelete: SetNull)
   programmeSession  ProgrammeSession? @relation(fields: [programmeSessionId], references: [id], onDelete: SetNull)
@@ -442,6 +476,63 @@ model WorkoutLog {
   @@index([programmeSessionId])
   @@index([status])
   @@index([startedAt])
+}
+
+/// Tracking des appels IA (coût, latence, modèle, tokens, statut).
+/// Aucune donnée sensible (pas de prompt brut). Utilisé pour le contrôle
+/// du coût et la détection d'erreurs.
+model AiUsageLog {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  /// program_generation | exercise_replacement | coach_review | safety_check
+  kind           String
+  model          String
+  userId         String?
+  clientId       String?
+  inputTokens    Int?
+  outputTokens   Int?
+  latencyMs      Int?
+  estimatedCost  Float?
+  /// success | error | refused_safety
+  status         String    @default("success")
+  errorMessage   String?
+  metadata       Json?
+
+  @@index([createdAt])
+  @@index([kind])
+  @@index([userId])
+  @@index([clientId])
+}
+
+/// Trace d'une demande de génération de programme par IA.
+/// Permet au coach de revoir, valider ou rejeter une génération.
+model AiProgramRequest {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  clientId            String
+  requestedByUserId   String?
+  objectif            String
+  niveau              String
+  weeks               Int
+  sessionsPerWeek     Int
+  equipment           String[]  @default([])
+  restrictions        String    @default("")
+  extraInstructions   String    @default("")
+  /// pending_validation | approved | rejected | refused_safety
+  status              String    @default("pending_validation")
+  programmeId         String?
+  draftSummary        Json?
+  rejectionReason     String?
+  approvedAt          DateTime?
+  approvedByUserId    String?
+
+  client              Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  programme           Programme? @relation(fields: [programmeId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 /// Une série effectivement réalisée pendant un WorkoutLog.

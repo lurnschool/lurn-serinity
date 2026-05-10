@@ -21,6 +21,18 @@ export default function AppShell({ children }) {
     return <main className="min-h-screen">{children}</main>
   }
 
+  // Routes adhérentes immersives (onboarding, wizard IA, mode focus séance).
+  // Elles gèrent leur propre chrome plein écran et n'utilisent PAS le shell
+  // mobile commun (header + bottom nav).
+  const adherentImmersive = (
+    pathname === '/adherent/onboarding' ||
+    pathname === '/adherent/programme-ia' ||
+    pathname.startsWith('/adherent/seance/focus')
+  )
+  if (adherentImmersive) {
+    return <main className="min-h-screen">{children}</main>
+  }
+
   if (pathname.startsWith('/adherent')) {
     return <AdherentShell>{children}</AdherentShell>
   }
