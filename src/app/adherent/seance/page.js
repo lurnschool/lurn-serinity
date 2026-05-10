@@ -8,6 +8,7 @@ import {
 } from '@/components/ui'
 import { IconChevron, IconClose, IconFlame } from '@/components/layouts/icons'
 import { muscleLabel, levelVariant, levelLabel } from '@/lib/exercise-library'
+import ExerciseMediaCard from '@/components/ExerciseMediaCard'
 
 // === Rest Timer Hook ======================================================
 
@@ -184,16 +185,24 @@ function ExerciseBlock({ exercise, sets, workoutLogId, onSetsChange, onTriggerRe
 
   return (
     <Card padding="md" className="space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-heading text-surface-950 leading-tight truncate">{ex?.name || 'Exercice'}</p>
-          <p className="text-[11px] text-surface-500 mt-0.5">
-            {ex && muscleLabel(ex.primaryMuscleGroup)}
-            {exercise.tempo && ` · tempo ${exercise.tempo}`}
-            {exercise.targetRpe && ` · RPE ${exercise.targetRpe}`}
-          </p>
+      <div className="flex items-start gap-3">
+        {/* Vignette média (image/GIF/vidéo) ou fallback emoji */}
+        <div className="w-20 h-20 shrink-0">
+          <ExerciseMediaCard exercise={ex || { name: 'Exercice', primaryMuscleGroup: 'FULL_BODY' }} size="sm" />
         </div>
-        <Badge variant="brand" size="sm">{exercise.sets}× {range}</Badge>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-heading text-surface-950 leading-tight truncate">{ex?.name || 'Exercice'}</p>
+              <p className="text-[11px] text-surface-500 mt-0.5">
+                {ex && muscleLabel(ex.primaryMuscleGroup)}
+                {exercise.tempo && ` · tempo ${exercise.tempo}`}
+                {exercise.targetRpe && ` · RPE ${exercise.targetRpe}`}
+              </p>
+            </div>
+            <Badge variant="brand" size="sm" className="shrink-0">{exercise.sets}× {range}</Badge>
+          </div>
+        </div>
       </div>
 
       {exercise.coachNotes && (

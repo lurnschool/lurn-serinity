@@ -6,6 +6,7 @@ import {
   Input, Textarea, Select, FormField, Modal, EmptyState, LoadingState,
   ErrorState, Avatar,
 } from '@/components/ui'
+import ExerciseMediaCard from '@/components/ExerciseMediaCard'
 import {
   MUSCLE_GROUPS, LEVELS, GOAL_TAGS, EQUIPMENT_PRESETS,
   muscleLabel, levelLabel, levelVariant, goalLabel, goalVariant,
@@ -184,6 +185,7 @@ const EMPTY_FORM = {
   instructions: '',
   commonMistakes: [],
   contraindications: [],
+  mediaUrl: '',
 }
 
 function ExerciseFormModal({ open, exercise, onClose, onSaved }) {
@@ -293,6 +295,19 @@ function ExerciseFormModal({ open, exercise, onClose, onSaved }) {
           <ListEditor value={form.contraindications} onChange={v => set('contraindications', v)}
             placeholder="Ex: Lombalgie aiguë" />
         </FormField>
+
+        <FormField label="URL média (image/GIF/vidéo MP4/YouTube)" hint="Optionnel. Affiché dans la fiche exercice et la séance.">
+          <Input
+            value={form.mediaUrl || ''}
+            onChange={e => set('mediaUrl', e.target.value)}
+            placeholder="https://… (jpg, gif, mp4, youtube.com/watch?v=…)"
+          />
+          {form.mediaUrl && (
+            <div className="mt-2">
+              <ExerciseMediaCard exercise={form} size="md" />
+            </div>
+          )}
+        </FormField>
       </form>
     </Modal>
   )
@@ -320,6 +335,9 @@ function ExerciseDetailDrawer({ exercise, onClose, onEdit, onArchive, onRestore 
       )}
     >
       <div className="space-y-5">
+        {/* Media en haut */}
+        <ExerciseMediaCard exercise={exercise} size="lg" />
+
         <div className="flex flex-wrap gap-1.5">
           <Badge variant={levelVariant(exercise.level)}>{levelLabel(exercise.level)}</Badge>
           <Badge variant="forme">{muscleLabel(exercise.primaryMuscleGroup)}</Badge>

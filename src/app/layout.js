@@ -7,6 +7,14 @@ import AppShell from '@/components/AppShell'
 export const metadata = {
   title: 'City Coaching — Votre salle de sport',
   description: 'City Coaching — Programmes premium et suivi personnalisé pour votre salle de sport.',
+  manifest: '/manifest.webmanifest',
+  applicationName: 'City Coaching',
+  appleWebApp: {
+    capable: true,
+    title: 'City Coaching',
+    statusBarStyle: 'black-translucent',
+  },
+  formatDetection: { telephone: false },
   icons: {
     icon: '/logo-city-coaching.png',
     apple: '/logo-city-coaching.png',
@@ -16,6 +24,14 @@ export const metadata = {
     description: 'Programmes premium et suivi personnalisé pour votre salle de sport.',
     images: ['/logo-city-coaching.png'],
   },
+}
+
+export const viewport = {
+  themeColor: '#0b0b0d',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
 }
 
 export default async function RootLayout({ children }) {
