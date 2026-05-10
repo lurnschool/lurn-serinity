@@ -38,6 +38,8 @@ export default function CoachDashboardPage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [seeding, setSeeding] = useState(false)
+  const [seedReport, setSeedReport] = useState(null)
 
   const load = async () => {
     setLoading(true); setError('')
@@ -59,6 +61,22 @@ export default function CoachDashboardPage() {
     finally { setLoading(false) }
   }
   useEffect(() => { load() }, [])
+
+  const seedCatalog = async () => {
+    setSeeding(true); setSeedReport(null)
+    try {
+      const res = await fetch('/api/admin/seed-catalog', { method: 'POST' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error || `Erreur ${res.status}`)
+      setSeedReport(data)
+      // Recharger le cockpit pour rafraîchir les stats
+      await load()
+    } catch (e) {
+      setSeedReport({ error: e?.message || 'Erreur réseau' })
+    } finally {
+      setSeeding(false)
+    }
+  }
 
   if (loading) return <LoadingState label="Chargement du cockpit…" />
   if (error)   return <ErrorState description={error} onRetry={load} />
@@ -245,6 +263,48 @@ export default function CoachDashboardPage() {
                   </Link>
                 ))}
               </div>
+            </Card>
+          )}
+
+          {/* Init catalogue — visible tant que biblio<30 ou programmes<5 */}
+          {(t.exercisesActive < 30 || t.programmes < 5) && (
+            <Card padding="md" className="border-accent-500/30 bg-accent-500/5">
+              <p className="ui-section-label text-accent-300 mb-1">Premier déploiement</p>
+              <h3 className="text-heading text-surface-950 mb-2">Initialiser le catalogue</h3>
+              <p className="text-xs text-surface-600 mb-3">
+                Charge la bibliothèque ({t.exercisesActive} / 40 exos) et les 8 programmes
+                templates. Idempotent — les éléments existants sont conservés.
+              </p>
+              {seedReport && (
+                <div className="text-[11px] mb-3 p-2.5 rounded-lg bg-surface-50 border border-surface-200 space-y-0.5">
+                  {seedReport.error && (
+                    <p className="text-red-300 font-medium">{seedReport.error}</p>
+                  )}
+                  {seedReport.exercises && (
+                    <p className="text-surface-700">
+                      Exos : {seedReport.exercises.created} créés · {seedReport.exercises.skipped} skipped
+                    </p>
+                  )}
+                  {seedReport.programmes && (
+                    <p className="text-surface-700">
+                      Programmes : {seedReport.programmes.created} créés · {seedReport.programmes.skipped} skipped
+                      {seedReport.programmes.droppedExercises > 0 && ` · ${seedReport.programmes.droppedExercises} exos manquants`}
+                    </p>
+                  )}
+                  {seedReport.errors?.length > 0 && (
+                    <p className="text-amber-300 font-medium">{seedReport.errors.length} erreur(s) — voir console serveur.</p>
+                  )}
+                </div>
+              )}
+              <Button
+                variant="primary"
+                size="md"
+                className="w-full justify-center"
+                loading={seeding}
+                onClick={seedCatalog}
+                leftIcon={<IconLibrary className="w-4 h-4" />}>
+                {seeding ? 'Initialisation…' : 'Lancer l\'initialisation'}
+              </Button>
             </Card>
           )}
 
