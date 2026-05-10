@@ -22,13 +22,13 @@ import { IconChevron, IconFlame } from '@/components/layouts/icons'
 import MuscleHero from '@/components/exercises/MuscleHero'
 
 const OBJECTIFS = [
-  { value: '',             label: 'Tous',           gradient: 'from-surface-200/40 to-surface-100', accent: 'brand', muscle: 'FULL_BODY' },
-  { value: 'remise_forme', label: 'Remise forme',   gradient: 'from-emerald-500/20 to-brand-500/10', accent: 'emerald', muscle: 'FULL_BODY' },
-  { value: 'perte_poids',  label: 'Perte de poids', gradient: 'from-orange-500/20 to-red-500/10',    accent: 'orange',  muscle: 'CARDIO' },
-  { value: 'prise_masse',  label: 'Prise de masse', gradient: 'from-violet-500/20 to-brand-500/10',  accent: 'violet',  muscle: 'PECTORAUX' },
-  { value: 'endurance',    label: 'Endurance',      gradient: 'from-blue-500/20 to-cyan-500/10',     accent: 'blue',    muscle: 'CARDIO' },
-  { value: 'force',        label: 'Force',          gradient: 'from-red-500/20 to-orange-500/10',    accent: 'red',     muscle: 'JAMBES' },
-  { value: 'souplesse',    label: 'Souplesse',      gradient: 'from-cyan-500/20 to-emerald-500/10',  accent: 'cyan',    muscle: 'FULL_BODY' },
+  { value: '',             label: 'Tous',           gradient: 'from-surface-200/40 to-surface-100',                    accent: 'brand-300',   muscle: 'FULL_BODY' },
+  { value: 'remise_forme', label: 'Remise forme',   gradient: 'from-brand-500/40 via-emerald-500/30 to-ocean-500/20',  accent: 'brand-300',   muscle: 'FULL_BODY' },
+  { value: 'perte_poids',  label: 'Perte de poids', gradient: 'from-accent-500/45 via-rose-500/30 to-amber-500/20',    accent: 'accent-300',  muscle: 'CARDIO' },
+  { value: 'prise_masse',  label: 'Prise de masse', gradient: 'from-plum-500/45 via-fuchsia-500/30 to-rose-500/20',    accent: 'plum-300',    muscle: 'PECTORAUX' },
+  { value: 'endurance',    label: 'Endurance',      gradient: 'from-ocean-500/45 via-blue-500/30 to-indigo-500/20',    accent: 'ocean-300',   muscle: 'CARDIO' },
+  { value: 'force',        label: 'Force',          gradient: 'from-rose-600/50 via-accent-500/30 to-amber-500/20',    accent: 'rose-300',    muscle: 'JAMBES' },
+  { value: 'souplesse',    label: 'Souplesse',      gradient: 'from-teal-500/45 via-ocean-500/30 to-emerald-500/20',   accent: 'teal-300',    muscle: 'DOS' },
 ]
 
 const NIVEAUX = [
@@ -190,41 +190,52 @@ function ProgrammeCard({ p, onOpen, onAssign, assigning }) {
 
   return (
     <Card variant="interactive" padding="none" onClick={onOpen}
-      className="overflow-hidden">
-      {/* Hero photo réelle (Unsplash) avec overlay infos */}
-      <div className="relative h-44">
+      className="overflow-hidden card-premium">
+      {/* Hero photo réelle (Unsplash) avec overlay coloré dégradé */}
+      <div className="relative h-48">
         <MuscleHero objectif={p.objectif} muscleGroup={muscle} showOverlay={false} className="absolute inset-0" />
-        {/* Overlay sombre pour lisibilité */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+        {/* Overlay coloré gradient riche selon l'objectif */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${obj.gradient} mix-blend-multiply`} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         <div className="relative h-full p-4 flex flex-col justify-between">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Badge variant={obj.value ? 'brand' : 'neutral'} size="xs">{obj.label}</Badge>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold text-${obj.accent} bg-white/15 backdrop-blur-md border border-white/15`}>
+              {obj.label}
+            </span>
             <Badge variant={niv.variant} size="xs">{niv.label}</Badge>
             {p.alreadyAssigned && <Badge variant="success" size="xs">Déjà choisi</Badge>}
           </div>
-          <div className="flex items-end justify-between text-white">
-            <div className="flex flex-col leading-tight">
-              <span className="text-[10px] uppercase tracking-wider font-semibold opacity-90">{p.duree} sem</span>
-              <span className="text-[10px] opacity-80">
-                {p.sessionCount} séance{p.sessionCount > 1 ? 's' : ''}
-                {sessionsPerWeek > 0 ? ` · ${sessionsPerWeek}× / sem` : ''}
-              </span>
+          <div>
+            <p className="text-xl font-bold text-white tracking-tight leading-tight drop-shadow-lg">{p.nom}</p>
+            <div className="flex items-end justify-between mt-2 text-white">
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="font-bold tabular-nums">{p.duree}<span className="opacity-70 font-normal"> sem</span></span>
+                <span className="opacity-40">•</span>
+                <span className="opacity-90">
+                  {p.sessionCount} séance{p.sessionCount > 1 ? 's' : ''}
+                </span>
+                {sessionsPerWeek > 0 && (
+                  <>
+                    <span className="opacity-40">•</span>
+                    <span className="opacity-90">{sessionsPerWeek}×/sem</span>
+                  </>
+                )}
+              </div>
+              {p.adherentCount > 0 && (
+                <span className="text-[10px] opacity-90 font-semibold bg-white/15 backdrop-blur-md px-2 py-0.5 rounded-full">
+                  {p.adherentCount}
+                </span>
+              )}
             </div>
-            {p.adherentCount > 0 && (
-              <span className="text-[10px] opacity-90 font-semibold">{p.adherentCount} adhérent{p.adherentCount > 1 ? 's' : ''}</span>
-            )}
           </div>
         </div>
       </div>
 
       {/* Body */}
       <div className="p-4 space-y-3">
-        <div>
-          <p className="text-heading text-surface-950 leading-tight">{p.nom}</p>
-          {p.description && (
-            <p className="text-xs text-surface-600 mt-1 line-clamp-2">{p.description}</p>
-          )}
-        </div>
+        {p.description && (
+          <p className="text-xs text-surface-600 line-clamp-2">{p.description}</p>
+        )}
 
         <div className="flex items-center gap-2">
           <Button

@@ -200,20 +200,24 @@ export default function ProgrammeIAPage() {
 
   return (
     <div className="min-h-screen bg-surface-0 flex flex-col">
-      <header className="bg-surface-50 border-b border-surface-200 sticky top-0 z-20">
+      <header className="glass border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-mobile mx-auto px-4 h-14 flex items-center gap-2.5">
           <button onClick={() => step > 0 ? setStep(step - 1) : router.back()}
             className="text-surface-500 hover:text-surface-800">
             <IconChevron className="w-5 h-5 rotate-180" />
           </button>
-          <span className="text-sm font-semibold text-surface-900">Mon programme IA</span>
-          <span className="ml-auto text-[11px] text-surface-500 tabular-nums">
+          <span className="text-sm font-semibold text-surface-900">
+            <span className="bg-gradient-to-r from-brand-300 via-ocean-300 to-plum-300 bg-clip-text text-transparent">
+              Programme IA
+            </span>
+          </span>
+          <span className="ml-auto text-[11px] text-surface-500 tabular-nums font-bold">
             {step + 1} / {TOTAL_STEPS}
           </span>
         </div>
         <div className="max-w-mobile mx-auto px-4 pb-2">
           <div className="h-1 bg-surface-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all"
+            <div className="h-full bg-gradient-to-r from-accent-400 via-rose-400 to-plum-400 transition-all"
               style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }} />
           </div>
         </div>

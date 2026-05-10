@@ -24,6 +24,22 @@ import { IconChevron, IconClose, IconFlame } from '@/components/layouts/icons'
 import ExerciseMediaPlayer from '@/components/exercises/ExerciseMediaPlayer'
 import { muscleLabelFr } from '@/components/exercises/MuscleSilhouette'
 
+// Map muscle group → palette dominante pour le hero focus.
+function muscleTone(group = '') {
+  const g = String(group).toUpperCase()
+  if (['PECTORAUX','EPAULES','TRICEPS'].includes(g))
+    return { aurora: 'aurora-flame', label: 'text-accent-300', glow: 'shadow-glow-orange', accent: 'bg-accent-500' }
+  if (['DOS','BICEPS'].includes(g))
+    return { aurora: 'aurora-purple', label: 'text-plum-300', glow: 'shadow-glow-violet', accent: 'bg-plum-500' }
+  if (['JAMBES','FESSIERS','MOLLETS'].includes(g))
+    return { aurora: 'aurora-mint', label: 'text-brand-300', glow: 'shadow-glow-brand', accent: 'bg-brand-500' }
+  if (['CARDIO'].includes(g))
+    return { aurora: 'aurora-ocean', label: 'text-ocean-300', glow: 'shadow-glow-ocean', accent: 'bg-ocean-500' }
+  if (['ABDOS','AVANT_BRAS'].includes(g))
+    return { aurora: 'aurora-gold', label: 'text-amber-300', glow: 'shadow-glow-orange', accent: 'bg-amber-500' }
+  return { aurora: 'aurora-bg', label: 'text-brand-300', glow: 'shadow-glow-brand', accent: 'bg-brand-500' }
+}
+
 // === Rest Timer Hook ======================================================
 function useRestTimer() {
   const [endsAt, setEndsAt] = useState(null)
@@ -367,33 +383,34 @@ export default function SeanceFocusPage() {
   const range = current.repsMin === current.repsMax ? `${current.repsMin}` : `${current.repsMin}-${current.repsMax}`
   const sets = setsByExercise[current.id] || []
   const isLast = currentIndex === totalEx - 1
+  const tone = muscleTone(current.exerciseLibrary?.primaryMuscleGroup)
 
   return (
-    <div className="min-h-screen bg-surface-0 flex flex-col">
+    <div className={`min-h-screen bg-surface-0 flex flex-col aurora-bg ${tone.aurora}`}>
       <RestTimerBanner seconds={restTimer.remaining} onStop={restTimer.stop} />
 
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-surface-0/95 backdrop-blur-xl border-b border-surface-200">
+      <header className="sticky top-0 z-20 glass border-b border-white/10">
         <div className="max-w-mobile mx-auto px-4 h-12 flex items-center gap-2">
           <IconButton variant="ghost" size="sm" label="Quitter" onClick={() => router.push('/adherent')}>
             <IconClose className="w-5 h-5" />
           </IconButton>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-brand-300 font-bold leading-none">Mode focus</p>
-            <p className="text-xs font-semibold text-surface-950 truncate leading-tight mt-0.5">
+            <p className={`text-[10px] uppercase tracking-wider font-bold leading-none ${tone.label}`}>Mode focus</p>
+            <p className="text-xs font-semibold text-white truncate leading-tight mt-0.5">
               {log.programmeSession?.title || 'Séance'}
             </p>
           </div>
-          <span className="text-xs font-semibold text-surface-700 tabular-nums shrink-0">
+          <span className="text-xs font-semibold text-white/80 tabular-nums shrink-0">
             {currentIndex + 1}/{totalEx}
           </span>
         </div>
         <div className="max-w-mobile mx-auto px-4 pb-2 flex gap-1">
           {exercises.map((_, i) => (
             <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-              i < currentIndex ? 'bg-brand-500' :
-              i === currentIndex ? 'bg-brand-400' :
-              'bg-surface-200'
+              i < currentIndex ? tone.accent :
+              i === currentIndex ? `${tone.accent} opacity-70` :
+              'bg-white/15'
             }`} />
           ))}
         </div>
@@ -411,34 +428,37 @@ export default function SeanceFocusPage() {
           {/* Titre + actions */}
           <div className="flex items-start gap-2">
             <div className="flex-1 min-w-0">
-              <h1 className="text-title text-surface-950 leading-tight">
+              <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
                 {current.exerciseLibrary?.name || 'Exercice'}
               </h1>
-              <p className="text-xs text-surface-500 mt-1">
+              <p className={`text-xs font-semibold mt-1 ${tone.label}`}>
                 {current.exerciseLibrary?.primaryMuscleGroup && muscleLabelFr(current.exerciseLibrary.primaryMuscleGroup)}
-                {current.tempo && ` · tempo ${current.tempo}`}
-                {current.targetRpe && ` · RPE ${current.targetRpe}`}
+                {current.tempo && <span className="text-white/60"> · tempo {current.tempo}</span>}
+                {current.targetRpe && <span className="text-white/60"> · RPE {current.targetRpe}</span>}
               </p>
             </div>
-            <Badge variant="brand" size="md">{current.sets}× {range}</Badge>
+            <span className={`shrink-0 inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-white ${tone.accent}`}>
+              {current.sets}× {range}
+            </span>
           </div>
 
           {/* Notes coach */}
           {current.coachNotes && (
-            <Card padding="sm" className="bg-amber-500/5 border-amber-500/20">
+            <div className="glass rounded-2xl p-3.5 border-amber-500/30">
               <p className="text-xs text-amber-300 font-semibold uppercase tracking-wider mb-1">Note coach</p>
-              <p className="text-sm text-surface-800">{current.coachNotes}</p>
-            </Card>
+              <p className="text-sm text-white/90">{current.coachNotes}</p>
+            </div>
           )}
 
           {/* Bouton remplacer */}
-          <Button variant="ghost" size="sm" className="text-xs"
-            onClick={() => setShowReplace(true)}>
-            ↻ Remplacer cet exercice
-          </Button>
+          <button onClick={() => setShowReplace(true)}
+            className={`text-xs font-semibold ${tone.label} hover:opacity-80 inline-flex items-center gap-1`}>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+            Remplacer cet exercice
+          </button>
 
           {/* Header colonnes */}
-          <div className="flex items-center gap-2 px-3 text-[10px] uppercase tracking-wider text-surface-500 font-semibold">
+          <div className="flex items-center gap-2 px-3 text-[10px] uppercase tracking-wider text-white/50 font-semibold">
             <span className="w-7 text-center">#</span>
             <span className="flex-1 text-center">Reps</span>
             <span className="w-3" />
@@ -460,25 +480,25 @@ export default function SeanceFocusPage() {
               />
             ))}
             {sets.length === 0 && (
-              <p className="text-center text-xs text-surface-500 py-4">Préparation des séries…</p>
+              <p className="text-center text-xs text-white/60 py-4">Préparation des séries…</p>
             )}
           </div>
 
           {/* Stats */}
-          <Card padding="sm">
+          <div className="glass rounded-2xl p-3.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-surface-600">Progression séance</span>
-              <span className="text-brand-300 font-semibold tabular-nums">{progress}% · {completedSets}/{totalSets}</span>
+              <span className="text-white/70">Progression séance</span>
+              <span className={`font-bold tabular-nums ${tone.label}`}>{progress}% · {completedSets}/{totalSets}</span>
             </div>
-            <div className="h-1.5 bg-surface-200 rounded-full overflow-hidden mt-1.5">
-              <div className="h-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all" style={{ width: `${progress}%` }} />
+            <div className="h-1.5 bg-white/15 rounded-full overflow-hidden mt-1.5">
+              <div className={`h-full ${tone.accent} transition-all`} style={{ width: `${progress}%` }} />
             </div>
-          </Card>
+          </div>
         </div>
       </main>
 
       {/* Footer navigation */}
-      <footer className="sticky bottom-0 z-20 bg-surface-0/95 backdrop-blur-xl border-t border-surface-200 px-4 py-3"
+      <footer className="sticky bottom-0 z-20 glass border-t border-white/10 px-4 py-3"
         style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
         <div className="max-w-mobile mx-auto flex items-center gap-2">
           <Button
