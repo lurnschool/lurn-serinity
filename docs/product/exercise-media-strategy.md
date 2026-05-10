@@ -103,6 +103,32 @@ validation modèle économique TrackCoach.
 
 ---
 
+## Photos curées Unsplash — couche d'amorçage immédiate (Sprint 4.1)
+
+Intégration de photos Unsplash sélectionnées manuellement via
+`src/lib/media-presets.js`. Hotlink direct sur le CDN
+`images.unsplash.com` autorisé par la licence Unsplash
+(https://unsplash.com/license — usage commercial libre, attribution non
+obligatoire mais affichée dans le composant lecteur).
+
+Photos curées par :
+- 6 objectifs (`OBJECTIF_HEROS`) — cards programme.
+- 12 groupes musculaires (`MUSCLE_HEROS`) — fallback pour fiches
+  exercices sans média propriétaire encore tourné.
+- 10 équipements (`EQUIPMENT_HEROS`) — wizard onboarding.
+
+Composant `MuscleHero` :
+- `<img>` natif avec `loading="lazy"` et `decoding="async"`.
+- Fallback gradient anatomique stylé si l'image plante (réseau, blocage).
+- Crédit "Unsplash" affiché discrètement en haut-droite.
+
+**Cette couche remplace les emojis et la silhouette SVG** dans toutes
+les zones visuelles utilisateur (cards programme, hero exercice,
+sélecteur objectif du wizard IA). La silhouette SVG reste disponible
+techniquement pour des cas debug/admin.
+
+---
+
 ## Architecture média
 
 ### Champs DB ajoutés à `ExerciseLibrary`

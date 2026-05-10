@@ -24,14 +24,19 @@ import {
   LoadingState, ErrorState, FormField,
 } from '@/components/ui'
 import { IconChevron, IconFlame } from '@/components/layouts/icons'
+import MuscleHero from '@/components/exercises/MuscleHero'
+
+function ObjectifHero({ objectif }) {
+  return <MuscleHero objectif={objectif} muscleGroup="FULL_BODY" showOverlay={false} className="absolute inset-0" />
+}
 
 const OBJECTIFS = [
-  { value: 'remise_forme', label: 'Remise en forme', emoji: '🏃', desc: 'Retrouver une forme générale' },
-  { value: 'perte_poids',  label: 'Perte de poids',   emoji: '🔥', desc: 'Brûler & affiner' },
-  { value: 'prise_masse',  label: 'Prise de masse',   emoji: '💪', desc: 'Gagner du muscle' },
-  { value: 'force',        label: 'Force',            emoji: '🏋️', desc: 'Soulever plus' },
-  { value: 'endurance',    label: 'Endurance',        emoji: '❤️', desc: 'Cardio + souffle' },
-  { value: 'souplesse',    label: 'Souplesse',        emoji: '🧘', desc: 'Mobilité' },
+  { value: 'remise_forme', label: 'Remise en forme', desc: 'Retrouver une forme générale' },
+  { value: 'perte_poids',  label: 'Perte de poids',  desc: 'Brûler & affiner la silhouette' },
+  { value: 'prise_masse',  label: 'Prise de masse',  desc: 'Gagner du muscle et du volume' },
+  { value: 'force',        label: 'Force',           desc: 'Soulever plus, progresser au max' },
+  { value: 'endurance',    label: 'Endurance',       desc: 'Cardio, souffle, capacité longue' },
+  { value: 'souplesse',    label: 'Souplesse',       desc: 'Mobilité articulaire et flexibilité' },
 ]
 
 const NIVEAUX = [
@@ -41,16 +46,16 @@ const NIVEAUX = [
 ]
 
 const EQUIPMENTS = [
-  { value: 'bodyweight',  label: 'Au poids du corps', emoji: '🤸' },
-  { value: 'dumbbell',    label: 'Haltères',           emoji: '🏋️' },
-  { value: 'barbell',     label: 'Barre + disques',    emoji: '🪨' },
-  { value: 'kettlebell',  label: 'Kettlebell',         emoji: '🔔' },
-  { value: 'cable',       label: 'Poulies',            emoji: '⛓️' },
-  { value: 'machine',     label: 'Machines guidées',   emoji: '⚙️' },
-  { value: 'bench',       label: 'Banc',               emoji: '🛋️' },
-  { value: 'pullup_bar',  label: 'Barre traction',     emoji: '🔝' },
-  { value: 'bands',       label: 'Élastiques',         emoji: '🎀' },
-  { value: 'cardio_machine', label: 'Tapis / vélo',    emoji: '🏃' },
+  { value: 'bodyweight',     label: 'Au poids du corps' },
+  { value: 'dumbbell',       label: 'Haltères' },
+  { value: 'barbell',        label: 'Barre + disques' },
+  { value: 'kettlebell',     label: 'Kettlebell' },
+  { value: 'cable',          label: 'Poulies' },
+  { value: 'machine',        label: 'Machines guidées' },
+  { value: 'bench',          label: 'Banc' },
+  { value: 'pullup_bar',     label: 'Barre de traction' },
+  { value: 'bands',          label: 'Élastiques' },
+  { value: 'cardio_machine', label: 'Tapis / vélo / rameur' },
 ]
 
 const TOTAL_STEPS = 5
@@ -171,13 +176,14 @@ export default function ProgrammeIAPage() {
 
   // Écran résultat (succès / fallback / safety)
   if (resultMsg) {
+    const tone = resultMsg.kind === 'success' ? 'border-brand-500/30 bg-brand-500/5'
+              : resultMsg.kind === 'safety'  ? 'border-amber-500/30 bg-amber-500/5'
+              : 'border-surface-300 bg-surface-50'
     return (
       <div className="min-h-screen flex items-center justify-center p-5">
-        <Card padding="lg" className="max-w-md w-full text-center space-y-4">
+        <Card padding="lg" className={`max-w-md w-full text-center space-y-4 ${tone}`}>
           <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-300">
-            {resultMsg.kind === 'success' ? <IconFlame className="w-7 h-7" /> :
-             resultMsg.kind === 'safety'  ? <span className="text-2xl">🛟</span> :
-             <span className="text-2xl">📚</span>}
+            <IconFlame className="w-7 h-7" />
           </div>
           <div>
             <h1 className="text-title text-surface-950">{resultMsg.title}</h1>
@@ -223,20 +229,34 @@ export default function ProgrammeIAPage() {
                 <h1 className="text-title text-surface-950">Quel est ton objectif ?</h1>
                 <p className="text-sm text-surface-500 mt-1">L'IA construit autour de cette intention.</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {OBJECTIFS.map(o => (
-                  <button key={o.value}
-                    onClick={() => { update('objectif', o.value); setStep(1) }}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
-                      form.objectif === o.value
-                        ? 'border-brand-500 bg-brand-500/5 shadow-card'
-                        : 'border-surface-200 bg-surface-50 hover:border-surface-300'
-                    }`}>
-                    <span className="text-2xl block mb-2">{o.emoji}</span>
-                    <p className="text-sm font-semibold text-surface-950">{o.label}</p>
-                    <p className="text-[11px] text-surface-500 mt-0.5">{o.desc}</p>
-                  </button>
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {OBJECTIFS.map(o => {
+                  const active = form.objectif === o.value
+                  return (
+                    <button key={o.value}
+                      onClick={() => { update('objectif', o.value); setStep(1) }}
+                      className={`group relative overflow-hidden rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
+                        active
+                          ? 'border-brand-500 shadow-glow-brand'
+                          : 'border-surface-200 hover:border-surface-300'
+                      }`}>
+                      {/* Photo Unsplash en hero */}
+                      <div className="relative h-24">
+                        <ObjectifHero objectif={o.value} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      </div>
+                      <div className="p-3.5 bg-surface-50">
+                        <p className={`text-sm font-semibold ${active ? 'text-brand-300' : 'text-surface-950'}`}>{o.label}</p>
+                        <p className="text-[11px] text-surface-500 mt-0.5">{o.desc}</p>
+                      </div>
+                      {active && (
+                        <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-card">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -319,20 +339,19 @@ export default function ProgrammeIAPage() {
                   const on = form.preferredEquipment.includes(e.value)
                   return (
                     <button key={e.value} onClick={() => toggleEq(e.value)}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
+                      className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 text-left transition-all active:scale-[0.98] ${
                         on
                           ? 'border-brand-500 bg-brand-500/5'
                           : 'border-surface-200 bg-surface-50 hover:border-surface-300'
                       }`}>
-                      <div className="flex items-start justify-between">
-                        <span className="text-2xl">{e.emoji}</span>
+                      <span className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center ${
+                        on ? 'border-brand-500 bg-brand-500 text-white' : 'border-surface-300'
+                      }`}>
                         {on && (
-                          <span className="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
-                          </span>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                         )}
-                      </div>
-                      <p className="text-sm font-semibold text-surface-950 mt-2">{e.label}</p>
+                      </span>
+                      <p className={`text-sm font-medium ${on ? 'text-surface-950' : 'text-surface-700'}`}>{e.label}</p>
                     </button>
                   )
                 })}
