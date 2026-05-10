@@ -43,6 +43,28 @@ export const VALID_MUSCLE = new Set(MUSCLE_GROUPS.map(m => m.value))
 export const VALID_LEVEL  = new Set(LEVELS.map(l => l.value))
 export const VALID_GOAL   = new Set(GOAL_TAGS.map(g => g.value))
 
+/** Statut de validation média côté coach. */
+export const MEDIA_STATUSES = [
+  { value: 'pending',  label: 'À valider',  variant: 'warning' },
+  { value: 'approved', label: 'Validé',     variant: 'success' },
+  { value: 'rejected', label: 'Rejeté',     variant: 'danger'  },
+]
+export const VALID_MEDIA_STATUS = new Set(MEDIA_STATUSES.map(s => s.value))
+
+/** Type média principal. */
+export const MEDIA_TYPES = [
+  { value: 'none',     label: 'Aucun'   },
+  { value: 'image',    label: 'Image'   },
+  { value: 'gif',      label: 'GIF'     },
+  { value: 'mp4',      label: 'MP4'     },
+  { value: 'youtube',  label: 'YouTube' },
+  { value: 'three_d',  label: '3D'      },
+]
+export const VALID_MEDIA_TYPE = new Set(MEDIA_TYPES.map(t => t.value))
+
+export function mediaStatusLabel(v)   { return MEDIA_STATUSES.find(s => s.value === v)?.label   || v }
+export function mediaStatusVariant(v) { return MEDIA_STATUSES.find(s => s.value === v)?.variant || 'neutral' }
+
 export function muscleLabel(v)    { return MUSCLE_GROUPS.find(m => m.value === v)?.label || v }
 export function levelLabel(v)     { return LEVELS.find(l => l.value === v)?.label || v }
 export function levelVariant(v)   { return LEVELS.find(l => l.value === v)?.variant || 'neutral' }
@@ -121,6 +143,35 @@ export function validateExercisePayload(body, { requireName = true } = {}) {
   }
   if (body.mediaUrl !== undefined) {
     out.mediaUrl = body.mediaUrl ? String(body.mediaUrl).trim() : null
+  }
+  if (body.mediaType !== undefined) {
+    if (!VALID_MEDIA_TYPE.has(body.mediaType)) errs.push('mediaType invalide')
+    else out.mediaType = body.mediaType
+  }
+  if (body.thumbnailUrl !== undefined) {
+    out.thumbnailUrl = body.thumbnailUrl ? String(body.thumbnailUrl).trim() : null
+  }
+  if (body.videoProvider !== undefined) {
+    out.videoProvider = body.videoProvider ? String(body.videoProvider).trim().slice(0, 40) : null
+  }
+  if (body.mediaSource !== undefined) {
+    out.mediaSource = body.mediaSource ? String(body.mediaSource).trim().slice(0, 40) : null
+  }
+  if (body.mediaLicense !== undefined) {
+    out.mediaLicense = body.mediaLicense ? String(body.mediaLicense).trim().slice(0, 60) : null
+  }
+  if (body.mediaAttribution !== undefined) {
+    out.mediaAttribution = body.mediaAttribution ? String(body.mediaAttribution).trim().slice(0, 200) : null
+  }
+  if (body.mediaStatus !== undefined) {
+    if (!VALID_MEDIA_STATUS.has(body.mediaStatus)) errs.push('mediaStatus invalide')
+    else out.mediaStatus = body.mediaStatus
+  }
+  if (body.muscleMapUrl !== undefined) {
+    out.muscleMapUrl = body.muscleMapUrl ? String(body.muscleMapUrl).trim() : null
+  }
+  if (body.animationUrl !== undefined) {
+    out.animationUrl = body.animationUrl ? String(body.animationUrl).trim() : null
   }
 
   if (errs.length) return { ok: false, error: errs.join(' ; ') }

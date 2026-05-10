@@ -75,7 +75,7 @@ export default function CoachDashboardPage() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           label="Adhérents"
           value={t.clients}
@@ -94,7 +94,7 @@ export default function CoachDashboardPage() {
           label="Bibliothèque"
           value={t.exercisesActive}
           tone="blue"
-          hint={t.exercisesArchived ? `${t.exercisesArchived} archivés` : 'exercices actifs'}
+          hint={t.exercisesPendingMedia ? `${t.exercisesPendingMedia} média à valider` : `${t.exercisesArchived || 0} archivés`}
           icon={<IconLibrary className="w-5 h-5" />}
         />
         <StatCard
@@ -105,6 +105,51 @@ export default function CoachDashboardPage() {
           icon={<IconDumbbell className="w-5 h-5" />}
         />
       </div>
+
+      {/* Bandeau Intelligence */}
+      {data.intelligence && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {data.intelligence.compliancePct != null && (
+            <Card padding="md">
+              <p className="ui-section-label text-brand-300 mb-1">Compliance 7j</p>
+              <p className="text-3xl font-bold text-surface-950 tabular-nums">
+                {data.intelligence.compliancePct}<span className="text-base text-surface-500">%</span>
+              </p>
+              <p className="text-[11px] text-surface-500 mt-1">
+                {data.intelligence.completedThisWeek} / {data.intelligence.expectedWeekly} séances attendues
+              </p>
+              <div className="h-1.5 bg-surface-200 rounded-full overflow-hidden mt-2">
+                <div className="h-full bg-gradient-to-r from-brand-400 to-brand-600 transition-all"
+                  style={{ width: `${data.intelligence.compliancePct}%` }} />
+              </div>
+            </Card>
+          )}
+          <Card padding="md" className={data.intelligence.unreviewedCount > 0 ? 'border-amber-500/30 bg-amber-500/5' : ''}>
+            <p className="ui-section-label text-amber-300 mb-1">À reviewer</p>
+            <p className="text-3xl font-bold text-surface-950 tabular-nums">
+              {data.intelligence.unreviewedCount}
+            </p>
+            <p className="text-[11px] text-surface-500 mt-1">séances sans retour coach</p>
+            <Link href="/seances-adherents" className="text-[11px] text-brand-300 hover:text-brand-200 mt-2 inline-block">
+              Ouvrir →
+            </Link>
+          </Card>
+          <Card padding="md" className={data.intelligence.pendingAiPrograms?.length > 0 ? 'border-violet-500/30 bg-violet-500/5' : ''}>
+            <p className="ui-section-label text-violet-300 mb-1">Programmes IA</p>
+            <p className="text-3xl font-bold text-surface-950 tabular-nums">
+              {data.intelligence.pendingAiPrograms?.length || 0}
+            </p>
+            <p className="text-[11px] text-surface-500 mt-1">générés en attente de validation</p>
+          </Card>
+          <Card padding="md" className={data.intelligence.rpeAlerts?.length > 0 ? 'border-red-500/30 bg-red-500/5' : ''}>
+            <p className="ui-section-label text-red-300 mb-1">Surcharge</p>
+            <p className="text-3xl font-bold text-surface-950 tabular-nums">
+              {data.intelligence.rpeAlerts?.length || 0}
+            </p>
+            <p className="text-[11px] text-surface-500 mt-1">adhérents en RPE 9+ (7j)</p>
+          </Card>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Activité récente */}
@@ -170,6 +215,30 @@ export default function CoachDashboardPage() {
             )}
           </Card>
 
+          {data.intelligence?.pendingAiPrograms?.length > 0 && (
+            <Card padding="md" className="border-violet-500/30 bg-violet-500/5">
+              <p className="ui-section-label text-violet-300 mb-2">Programmes IA</p>
+              <h3 className="text-heading text-surface-950 mb-3">À valider</h3>
+              <div className="space-y-2">
+                {data.intelligence.pendingAiPrograms.slice(0, 4).map(req => (
+                  <Link key={req.id} href={`/clients/${req.client.id}`}
+                    className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-surface-100">
+                    <Avatar name={`${req.client.firstName} ${req.client.lastName}`} size="xs" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-surface-950 truncate">
+                        {req.client.firstName} {req.client.lastName}
+                      </p>
+                      <p className="text-[10px] text-surface-500 truncate">
+                        {req.programme?.nom || 'Programme'} · {req.objectif} · {req.niveau}
+                      </p>
+                    </div>
+                    <IconChevron className="w-3.5 h-3.5 text-surface-500" />
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          )}
+
           <Card padding="md">
             <p className="ui-section-label mb-3">Actions rapides</p>
             <div className="space-y-2">
@@ -193,6 +262,19 @@ export default function CoachDashboardPage() {
               </Link>
             </div>
           </Card>
+
+          {data.aiUsage && data.aiUsage.totalCalls > 0 && (
+            <Card padding="md">
+              <p className="ui-section-label mb-1">IA · 30 jours</p>
+              <p className="text-2xl font-bold text-surface-950 tabular-nums">
+                {data.aiUsage.totalCalls}
+                <span className="text-xs text-surface-500 font-normal"> appels</span>
+              </p>
+              <p className="text-[11px] text-surface-500 mt-1">
+                ≈ {data.aiUsage.estimatedCostUsd?.toFixed(2)} USD · latence moy {data.aiUsage.avgLatencyMs}ms
+              </p>
+            </Card>
+          )}
         </div>
       </div>
 

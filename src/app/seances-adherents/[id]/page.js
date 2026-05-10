@@ -31,6 +31,11 @@ export default function SeanceAdherentReviewPage() {
   const [reviewDraft, setReviewDraft] = useState('')
   const [savingReview, setSavingReview] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
+  const [aiDraftLoading, setAiDraftLoading] = useState(false)
+  const [aiSignals, setAiSignals] = useState([])
+  const [aiRecommendation, setAiRecommendation] = useState(null)
+  const [aiError, setAiError] = useState('')
+  const [aiFallback, setAiFallback] = useState(null)
 
   const load = async () => {
     setLoading(true); setError('')
@@ -61,6 +66,30 @@ export default function SeanceAdherentReviewPage() {
       }
     } finally {
       setSavingReview(false)
+    }
+  }
+
+  const requestAiDraft = async () => {
+    setAiDraftLoading(true); setAiError(''); setAiFallback(null)
+    try {
+      const res = await fetch('/api/coach/ai/review-session', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workoutLogId: params.id }),
+      })
+      const data = await res.json()
+      if (data?.fallback === 'AI_NOT_CONFIGURED') {
+        setAiFallback(data.message)
+        return
+      }
+      if (!res.ok) throw new Error(data?.error || 'Erreur IA')
+      // Pré-remplir le champ si vide, sinon proposer en complément
+      setReviewDraft(prev => prev?.trim() ? `${prev}\n\n${data.draft}` : data.draft)
+      setAiSignals(data.signals || [])
+      setAiRecommendation(data.recommendation || null)
+    } catch (e) {
+      setAiError(e?.message || 'Erreur réseau')
+    } finally {
+      setAiDraftLoading(false)
     }
   }
 
@@ -180,6 +209,34 @@ export default function SeanceAdherentReviewPage() {
               <p className="ui-section-label text-brand-300">Ton retour de coach</p>
               <p className="text-xs text-surface-500 mt-0.5">Visible côté adhérent dans son détail de séance.</p>
             </div>
+
+            <Button variant="secondary" size="sm" className="w-full justify-center"
+              loading={aiDraftLoading} onClick={requestAiDraft}>
+              ✨ Pré-rédiger avec l&apos;IA
+            </Button>
+            {aiFallback && (
+              <p className="text-[11px] text-amber-300 bg-amber-500/5 border border-amber-500/15 rounded-lg px-2 py-1.5">
+                {aiFallback}
+              </p>
+            )}
+            {aiError && (
+              <p className="text-[11px] text-red-400">{aiError}</p>
+            )}
+            {aiSignals.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {aiSignals.filter(s => s !== 'aucun').map(s => (
+                  <span key={s} className="text-[10px] uppercase tracking-wider text-brand-300 bg-brand-500/10 border border-brand-500/30 rounded-full px-2 py-0.5">
+                    {s}
+                  </span>
+                ))}
+                {aiRecommendation && (
+                  <span className="text-[10px] uppercase tracking-wider text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
+                    reco · {aiRecommendation}
+                  </span>
+                )}
+              </div>
+            )}
+
             <FormField>
               <Textarea
                 rows={6}

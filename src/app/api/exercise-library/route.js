@@ -24,12 +24,15 @@ export async function GET(req) {
   if (auth.error) return auth.error
 
   const { searchParams } = new URL(req.url)
-  const q          = searchParams.get('q')?.trim() || ''
-  const muscle     = searchParams.get('muscle') || ''
-  const level      = searchParams.get('level') || ''
-  const goal       = searchParams.get('goal') || ''
-  const equipment  = searchParams.get('equipment') || ''
-  const archived   = searchParams.get('includeArchived') === '1'
+  const q            = searchParams.get('q')?.trim() || ''
+  const muscle       = searchParams.get('muscle') || ''
+  const level        = searchParams.get('level') || ''
+  const goal         = searchParams.get('goal') || ''
+  const equipment    = searchParams.get('equipment') || ''
+  const mediaStatus  = searchParams.get('mediaStatus') || ''
+  const archived     = searchParams.get('includeArchived') === '1'
+
+  const VALID_MEDIA = new Set(['pending', 'approved', 'rejected'])
 
   const where = {}
   if (!archived) where.isActive = true
@@ -37,6 +40,7 @@ export async function GET(req) {
   if (level && VALID_LEVEL.has(level))    where.level = level
   if (goal && VALID_GOAL.has(goal))       where.goalTags = { has: goal }
   if (equipment)                          where.equipment = { has: equipment }
+  if (mediaStatus && VALID_MEDIA.has(mediaStatus)) where.mediaStatus = mediaStatus
   if (q) {
     where.OR = [
       { name:        { contains: q, mode: 'insensitive' } },
@@ -97,6 +101,15 @@ export async function POST(req) {
       commonMistakes:        v.data.commonMistakes ?? [],
       contraindications:     v.data.contraindications ?? [],
       mediaUrl:              v.data.mediaUrl ?? null,
+      mediaType:             v.data.mediaType ?? 'none',
+      thumbnailUrl:          v.data.thumbnailUrl ?? null,
+      videoProvider:         v.data.videoProvider ?? null,
+      mediaSource:           v.data.mediaSource ?? null,
+      mediaLicense:          v.data.mediaLicense ?? null,
+      mediaAttribution:      v.data.mediaAttribution ?? null,
+      mediaStatus:           v.data.mediaStatus ?? 'pending',
+      muscleMapUrl:          v.data.muscleMapUrl ?? null,
+      animationUrl:          v.data.animationUrl ?? null,
       isActive:              true,
     },
   })

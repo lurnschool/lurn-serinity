@@ -53,18 +53,35 @@ export default function AdherentHomePage() {
           <p className="ui-section-label text-brand-300 mb-1">{greeting},</p>
           <h1 className="text-title text-surface-950">{firstName}</h1>
         </div>
+
+        {/* CTA premium IA */}
+        <Card padding="md" className="bg-gradient-to-br from-brand-500/15 to-brand-700/5 border-brand-500/30">
+          <p className="ui-section-label text-brand-300">Créer mon programme</p>
+          <h2 className="text-title text-surface-950 mt-1">Génération IA personnalisée</h2>
+          <p className="text-sm text-surface-700 mt-2">
+            Réponds à 5 questions et l&apos;IA construit un programme calibré sur ton objectif,
+            ton matériel et ton niveau. Validation coach en option.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
+            <Link href="/adherent/programme-ia" className="flex-1">
+              <Button variant="primary" size="lg" className="w-full justify-center"
+                leftIcon={<IconFlame className="w-4 h-4" />}>
+                Générer mon programme
+              </Button>
+            </Link>
+            <Link href="/adherent/decouvrir" className="flex-1">
+              <Button variant="secondary" size="lg" className="w-full justify-center">
+                Catalogue
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
         <EmptyState
           variant="card"
           title="Aucun programme actif"
-          description="Demande à ton coach d'activer un programme pour toi, ou choisis-en un dans le catalogue pour démarrer en autonomie."
+          description="Tu peux aussi demander à ton coach de t'en activer un manuellement."
           icon={<IconFlame className="w-7 h-7" />}
-          action={(
-            <Link href="/adherent/decouvrir">
-              <Button variant="primary" size="lg">
-                Choisir mon programme
-              </Button>
-            </Link>
-          )}
         />
       </div>
     )
@@ -124,12 +141,20 @@ export default function AdherentHomePage() {
               )}
             </div>
           )}
-          <Link href={`/adherent/seance?sessionId=${currentSession.id}`}>
-            <Button variant="primary" size="lg" className="w-full justify-center"
-              rightIcon={<IconChevron className="w-4 h-4" />}>
-              Démarrer la séance
-            </Button>
-          </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Link href={`/adherent/seance/focus?sessionId=${currentSession.id}`}>
+              <Button variant="primary" size="lg" className="w-full justify-center shadow-glow-brand"
+                leftIcon={<IconFlame className="w-4 h-4" />}>
+                Mode focus
+              </Button>
+            </Link>
+            <Link href={`/adherent/seance?sessionId=${currentSession.id}`}>
+              <Button variant="secondary" size="lg" className="w-full justify-center"
+                rightIcon={<IconChevron className="w-4 h-4" />}>
+                Mode liste
+              </Button>
+            </Link>
+          </div>
         </Card>
       ) : (
         <Card padding="md">
