@@ -660,11 +660,16 @@ async function main() {
   console.log(`[seed:exercise-library] avant=${before} après=${after} créés=${created} mis_à_jour=${updated}`)
 }
 
-main()
-  .then(async () => { await prisma.$disconnect() })
-  .catch(async (e) => {
-    // eslint-disable-next-line no-console
-    console.error('[seed:exercise-library] erreur :', e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+// Exécuté seulement si lancé en CLI (npm run seed:exercise-library).
+if (require.main === module) {
+  main()
+    .then(async () => { await prisma.$disconnect() })
+    .catch(async (e) => {
+      // eslint-disable-next-line no-console
+      console.error('[seed:exercise-library] erreur :', e)
+      await prisma.$disconnect()
+      process.exit(1)
+    })
+}
+
+module.exports = { EXERCISES, main }

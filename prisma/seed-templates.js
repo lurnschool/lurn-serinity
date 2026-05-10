@@ -466,10 +466,17 @@ async function main() {
   console.log(`[seed:templates] créés=${created} skip=${skipped} exercises_droppés=${droppedExercises}`)
 }
 
-main()
-  .then(async () => { await prisma.$disconnect() })
-  .catch(async (e) => {
-    console.error('[seed:templates] erreur :', e?.message || e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+// Exécuté seulement si lancé en CLI (npm run seed:templates).
+// Permet à d'autres modules (route API admin) de require ce fichier
+// pour réutiliser TEMPLATES sans re-déclencher main().
+if (require.main === module) {
+  main()
+    .then(async () => { await prisma.$disconnect() })
+    .catch(async (e) => {
+      console.error('[seed:templates] erreur :', e?.message || e)
+      await prisma.$disconnect()
+      process.exit(1)
+    })
+}
+
+module.exports = { TEMPLATES, main }
